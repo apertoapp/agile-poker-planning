@@ -32,8 +32,7 @@
             <h2>🎬 Facilitateur</h2>
             <p class="form-description">Créez une nouvelle session et invitez votre équipe</p>
 
-            <label for="facilitatorName" class="visually-hidden">Votre nom</label>
-            <input
+            <label for="facilitatorName"></label><input
                     type="text"
                     id="facilitatorName"
                     placeholder="Votre nom (ex: Claude)"
@@ -51,8 +50,7 @@
 
             <div class="join-existing">
                 <p class="hint">Si vous avez déjà une session en cours :</p>
-                <label for="facilitatorSessionCode" class="visually-hidden">Code de session</label>
-                <input
+                <label for="facilitatorSessionCode"></label><input
                         type="text"
                         id="facilitatorSessionCode"
                         placeholder="Code de session (ex: equipe37)"
@@ -74,8 +72,7 @@
             <h2>👥 Participant</h2>
             <p class="form-description">Rejoignez une session existante</p>
 
-            <label for="participantName" class="visually-hidden">Votre nom</label>
-            <input
+            <label for="participantName"></label><input
                     type="text"
                     id="participantName"
                     placeholder="Votre nom (ex: Alice)"
@@ -83,8 +80,7 @@
                     autocomplete="off"
             >
 
-            <label for="participantSessionCode" class="visually-hidden">Code de session</label>
-            <input
+            <label for="participantSessionCode"></label><input
                     type="text"
                     id="participantSessionCode"
                     placeholder="Code de session (ex: equipe37)"
@@ -110,21 +106,14 @@
     const existingSessionId = urlParams.get('session');
     const roleFromUrl = urlParams.get('role');
 
-    // Fonction de sanitization
-    function sanitizeInput(input) {
-        if (typeof input !== 'string') return '';
-        return input.trim().slice(0, 200).replace(/[<>"'`]/g, '');
-    }
-
     if (existingSessionId) {
         // Si URL avec session, proposer directement de rejoindre
-        const sanitizedSession = sanitizeInput(existingSessionId);
         if (roleFromUrl === 'facilitator') {
             showFacilitatorForm();
-            document.getElementById('facilitatorSessionCode').value = sanitizedSession;
+            document.getElementById('facilitatorSessionCode').value = existingSessionId;
         } else {
             showParticipantForm();
-            document.getElementById('participantSessionCode').value = sanitizedSession;
+            document.getElementById('participantSessionCode').value = existingSessionId;
         }
     }
 
@@ -150,7 +139,7 @@
 
     function createSession() {
         const nameInput = document.getElementById('facilitatorName');
-        const playerName = sanitizeInput(nameInput.value);
+        const playerName = nameInput.value.trim();
 
         if (!playerName) {
             nameInput.classList.add('error-shake');
@@ -166,15 +155,15 @@
         localStorage.setItem('playerRole', 'facilitator');
 
         // Rediriger vers la session
-        window.location.href = `poker.html?session=${encodeURIComponent(sessionId)}&role=facilitator`;
+        window.location.href = `poker.html?session=${sessionId}&role=facilitator`;
     }
 
     function joinAsRole(role) {
         const nameInput = document.getElementById(role === 'facilitator' ? 'facilitatorName' : 'participantName');
         const sessionInput = document.getElementById(role === 'facilitator' ? 'facilitatorSessionCode' : 'participantSessionCode');
 
-        const playerName = sanitizeInput(nameInput.value);
-        const sessionCode = sanitizeInput(sessionInput.value.toLowerCase());
+        const playerName = nameInput.value.trim();
+        const sessionCode = sessionInput.value.trim().toLowerCase();
 
         if (!playerName) {
             nameInput.classList.add('error-shake');
@@ -193,7 +182,7 @@
         localStorage.setItem('playerRole', role);
 
         // Rediriger vers la session
-        window.location.href = `poker.html?session=${encodeURIComponent(sessionCode)}&role=${role}`;
+        window.location.href = `poker.html?session=${sessionCode}&role=${role}`;
     }
 
     function generateSessionId() {
