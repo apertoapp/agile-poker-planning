@@ -1,5 +1,9 @@
 # 🎯 Agile Poker Planning
 
+[![Planning Poker](https://img.shields.io/badge/Planning_Poker-8%20joueurs-blue?style=for-the-badge&logo=github)](https://apertoapp.github.io/agile-poker-planning/)
+[![100% Statique](https://img.shields.io/badge/100%25_Statique-NoServer-green?style=for-the-badge&logo=github)](https://apertoapp.github.io/agile-poker-planning/)
+[![Temps Réel](https://img.shields.io/badge/Temps_R%C3%A9el-BroadcastChannel-orange?style=for-the-badge&logo=electron)](https://apertoapp.github.io/agile-poker-planning/)
+
 > **Application Planning Poker autonome en temps réel pour 8 participants maximum et 1 facilitateur.**
 
 ## 📋 Description
