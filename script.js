@@ -27,6 +27,22 @@ let votingStateRef = null;
 
 // ==================== UTILITY FUNCTIONS ====================
 
+function sanitizeHTML(str) {
+    if (!str) return '';
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+}
+
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return '';
+    // Remove dangerous characters and limit length
+    return input
+        .trim()
+        .slice(0, 200) // Max 200 characters
+        .replace(/[<>"'`]/g, ''); // Remove potentially dangerous chars
+}
+
 function generatePlayerId() {
     return 'p_' + Math.random().toString(36).substr(2, 9);
 }
@@ -45,8 +61,8 @@ function getMyPlayerId() {
 // ==================== SESSION INITIALIZATION ====================
 
 function initPokerSession(sessionId, playerName, playerRole) {
-    currentSessionId = sessionId;
-    currentPlayerName = playerName;
+    currentSessionId = sanitizeInput(sessionId);
+    currentPlayerName = sanitizeInput(playerName);
     currentPlayerRole = playerRole || 'participant';
     myPlayerId = getMyPlayerId();
 
@@ -108,7 +124,7 @@ function setupFacilitatorUI() {
 
         // Sauvegarder la story après 500ms
         storyTimeout = setTimeout(() => {
-            storyRef.get('text').put(story);
+            storyRef.get('text').put(sanitizeInput(story));
         }, 500);
     });
 }
@@ -132,7 +148,7 @@ function setupParticipantUI() {
 
 function joinAsPlayer() {
     playersRef.get(myPlayerId).put({
-        name: currentPlayerName,
+        name: sanitizeInput(currentPlayerName),
         lastSeen: Date.now(),
         connected: true
     });
@@ -332,13 +348,19 @@ function updatePlayersList() {
 
                 const hasVoted = votes && votes[key];
                 const voteIcon = votesRevealed ?
-                    (hasVoted ? hasVoted.value : '❌') :
+                    (hasVoted ? sanitizeHTML(hasVoted.value) : '❌') :
                     (hasVoted ? '✅' : '❓');
 
-                playerCard.innerHTML = `
-                    <span class="player-name">${player.name}</span>
-                    <span class="player-vote">${voteIcon}</span>
-                `;
+                const playerNameSpan = document.createElement('span');
+                playerNameSpan.className = 'player-name';
+                playerNameSpan.textContent = player.name;
+
+                const playerVoteSpan = document.createElement('span');
+                playerVoteSpan.className = 'player-vote';
+                playerVoteSpan.innerHTML = voteIcon;
+
+                playerCard.appendChild(playerNameSpan);
+                playerCard.appendChild(playerVoteSpan);
 
                 if (key === myPlayerId) {
                     playerCard.classList.add('current-player');
@@ -356,7 +378,7 @@ function updatePlayersList() {
 
 function openVoting() {
     const storyInput = document.getElementById('storyInput');
-    const story = storyInput.value.trim();
+    const story = sanitizeInput(storyInput.value);
 
     if (!story) {
         showNotification('Veuillez saisir une User Story', 'warning');
@@ -457,10 +479,17 @@ function displayResults() {
 
             const voteCard = document.createElement('div');
             voteCard.className = 'vote-result-card';
-            voteCard.innerHTML = `
-                <div class="vote-player-name">${vote.playerName}</div>
-                <div class="vote-card-value">${vote.value}</div>
-            `;
+
+            const playerNameDiv = document.createElement('div');
+            playerNameDiv.className = 'vote-player-name';
+            playerNameDiv.textContent = vote.playerName;
+
+            const voteValueDiv = document.createElement('div');
+            voteValueDiv.className = 'vote-card-value';
+            voteValueDiv.textContent = vote.value;
+
+            voteCard.appendChild(playerNameDiv);
+            voteCard.appendChild(voteValueDiv);
             votesGrid.appendChild(voteCard);
 
             // Collect numeric values for stats
