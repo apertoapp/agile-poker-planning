@@ -1,6 +1,6 @@
 # 🎯 Agile Poker Planning
 
-Application web simple pour réaliser des sessions de Planning Poker Agile en temps réel avec 8 participants maximum et 1 facilitateur.
+> **Application Planning Poker autonome en temps réel pour 8 participants maximum et 1 facilitateur.**
 
 ## 📋 Description
 
@@ -21,56 +21,9 @@ Cette application permet aux équipes agiles de réaliser des estimations de tâ
 - 🎯 Affichage des résultats à la fin du timer
 - 🔄 Réinitialisation pour une nouvelle session
 
-## 🚀 Installation
-
-### Option 1 : GitHub Pages (Recommandé)
-
-1. **Créez un nouveau repository sur GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/apertoapp/agile-poker-planning.git
-   git push -u origin main
-   ```
-
-2. **Activez GitHub Pages**
-    - Allez dans les Settings de votre repository
-    - Section "Pages"
-    - Source: "Deploy from a branch"
-    - Branch: "main" / "root"
-    - Cliquez sur "Save"
-
-3. **Accédez à votre application**
-    - URL: `https://votre-username.github.io/agile-poker/`
-
-### Option 2 : Serveur local
-
-```bash
-# Avec Python 3
-python -m http.server 8000
-
-# Avec Node.js
-npx http-server
-
-# Avec PHP
-php -S localhost:8000
-```
-
-Puis ouvrez `http://localhost:8000` dans votre navigateur.
-
-## 📂 Structure des fichiers
-
-```
-agile-poker/
-├── index.html          # Page d'accueil (choix du rôle)
-├── participant.html    # Interface participant
-├── facilitator.html    # Interface facilitateur
-├── style.css           # Styles CSS communs
-├── script.js           # Logique JavaScript
-└── README.md           # Documentation
-```
+## 🚀 Accédez à l'appliction 
+- **L'application est hébergée sur GitHub Page**
+- **URL** : [https://apertoapp.github.io/agile-poker-planning](https://apertoapp.github.io/agile-poker-planning)
 
 ## 🎮 Utilisation
 
@@ -189,9 +142,17 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 - Proposer des nouvelles fonctionnalités
 - Soumettre des pull requests
 
-## 📞 Support
+## 📞 Contact & Support
 
-Pour toute question ou problème, ouvrez une issue sur GitHub.
+**Auteur** : **Claude BUENO** - Coach Agile, Lean & AI-Native | Transformation des organisations à l’ère de l’IA  
+**LinkedIn** : [https://www.linkedin.com/in/claudebueno](https://www.linkedin.com/in/claudebueno)  
+**Usage** : 100% gratuit pour équipes/formation
+
+```
+❓ Question ? → Issues GitHub
+✨ Idée ? → Pull Request
+⭐ Like ? → Star le repo !
+```
 
 ---
 

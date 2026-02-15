@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participant - Agile Poker</title>
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+<a href="../index.html" class="back-btn">← Retour</a>
+
+<div class="container">
+    <h1>👥 Interface Participant</h1>
+
+    <div class="timer">
+        <h2>Temps restant</h2>
+        <div class="timer-display" id="participantTimer">--:--</div>
+    </div>
+
+    <div id="participantMessage"></div>
+
+    <div id="cardSelection">
+        <h2>Choisissez votre carte</h2>
+        <div class="cards-grid" id="participantCards"></div>
+        <div class="vote-btn-container">
+            <button class="btn btn-success" id="voteBtn" disabled>
+                ✓ Valider mon vote
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="../scripts/script.js"></script>
+<script>
+    // Initialize participant view
+    initParticipant();
+</script>
+</body>
+</html>
