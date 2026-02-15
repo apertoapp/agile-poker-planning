@@ -40,7 +40,7 @@ function sanitizeInput(input) {
     return input
         .trim()
         .slice(0, 200) // Max 200 characters
-        .replace(/[<>"'`]/g, ''); // Remove potentially dangerous chars
+        .replace(/[<>\"'`]/g, ''); // Remove potentially dangerous chars
 }
 
 function generatePlayerId() {
