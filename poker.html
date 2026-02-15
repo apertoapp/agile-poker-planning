@@ -34,37 +34,43 @@
         <div class="players-list" id="playersList"></div>
     </div>
 
-    <!-- Zone de story -->
-    <div class="story-section">
-        <h3>📝 User Story</h3>
-        <div id="facilitatorStoryInput" class="hidden">
-            <input
-                    type="text"
-                    id="storyInput"
-                    placeholder="Ex: US-123: Login utilisateur"
-                    class="story-input"
-            >
-            <button class="btn btn-primary" id="openVoteBtn" onclick="openVoting()">
-                🚀 Ouvrir le vote
-            </button>
+    <!-- Zone de story - FACILITATEUR -->
+    <div class="story-section" id="facilitatorStorySection" style="display: none;">
+        <h3>📝 User Story à estimer</h3>
+        <p class="hint-text">Saisissez la référence de la User Story que l'équipe doit estimer</p>
+        <input
+                type="text"
+                id="storyInput"
+                placeholder="Ex: US-123: Implémenter le login utilisateur"
+                class="story-input"
+        >
+        <button class="btn btn-primary" id="openVoteBtn" onclick="openVoting()" disabled>
+            🚀 Ouvrir le vote
+        </button>
+        <p class="hint-text" style="margin-top: 10px;">
+            💡 Une fois le vote ouvert, les participants pourront voir la story et voter
+        </p>
+    </div>
+
+    <!-- Zone de story - PARTICIPANT -->
+    <div class="story-section" id="participantStorySection" style="display: none;">
+        <div id="waitingForStory" class="message info">
+            ⏳ En attente que le facilitateur ouvre une session de vote...
         </div>
         <div id="participantStoryDisplay" class="hidden">
+            <h3>📝 User Story à estimer</h3>
             <div class="story-display">
-                <div class="story-label">Story en cours :</div>
                 <div class="story-text" id="currentStory">En attente...</div>
             </div>
         </div>
-        <div id="waitingForStory" class="message info hidden">
-            ⏳ En attente que le facilitateur ouvre une session de vote...
-        </div>
     </div>
 
-    <!-- Cartes de vote (uniquement pour participants) -->
-    <div class="voting-section" id="votingSection">
+    <!-- Cartes de vote - UNIQUEMENT POUR LES PARTICIPANTS -->
+    <div class="voting-section" id="votingSection" style="display: none;">
         <h3>🃏 Votre vote</h3>
         <div class="cards-grid" id="cardsGrid"></div>
         <div class="vote-status" id="voteStatus">
-            Sélectionnez une carte pour voter
+            En attente de l'ouverture du vote...
         </div>
     </div>
 
@@ -132,9 +138,6 @@
                 roleIcon.textContent = '👥';
                 roleText.textContent = 'Participant';
                 roleBadge.classList.add('role-participant');
-                // Masquer les boutons de contrôle pour les participants
-                document.getElementById('revealBtn').style.display = 'none';
-                document.getElementById('resetBtn').style.display = 'none';
             }
 
             initPokerSession(sessionId, playerName, userRole);

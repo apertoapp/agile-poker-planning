@@ -75,31 +75,27 @@ function initPokerSession(sessionId, playerName, playerRole) {
 }
 
 function setupFacilitatorUI() {
-    // Le facilitateur ne vote pas
+    // Le facilitateur NE VOTE JAMAIS - pas de cartes !
     document.getElementById('votingSection').style.display = 'none';
 
-    // Afficher l'input de story
-    document.getElementById('facilitatorStoryInput').classList.remove('hidden');
-    document.getElementById('participantStoryDisplay').classList.add('hidden');
-    document.getElementById('waitingForStory').classList.add('hidden');
+    // Afficher la section facilitateur pour saisir la story
+    document.getElementById('facilitatorStorySection').style.display = 'block';
+    document.getElementById('participantStorySection').style.display = 'none';
 
     // Les actions sont visibles
     document.getElementById('actionsSection').style.display = 'flex';
 
-    // Setup story input avec synchronisation
+    // Setup story input avec validation
     const storyInput = document.getElementById('storyInput');
+    const openBtn = document.getElementById('openVoteBtn');
+
     let storyTimeout;
     storyInput.addEventListener('input', (e) => {
         clearTimeout(storyTimeout);
         const story = e.target.value.trim();
 
-        // Activer le bouton si story non vide
-        const openBtn = document.getElementById('openVoteBtn');
-        if (story) {
-            openBtn.disabled = false;
-        } else {
-            openBtn.disabled = true;
-        }
+        // Activer le bouton seulement si story non vide
+        openBtn.disabled = !story;
 
         // Sauvegarder la story après 500ms
         storyTimeout = setTimeout(() => {
@@ -109,14 +105,17 @@ function setupFacilitatorUI() {
 }
 
 function setupParticipantUI() {
-    // Le participant peut voter
+    // Le participant peut voter (mais pas avant ouverture)
     document.getElementById('votingSection').style.display = 'block';
     renderCards();
 
-    // Afficher la zone d'attente par défaut
-    document.getElementById('facilitatorStoryInput').classList.add('hidden');
-    document.getElementById('participantStoryDisplay').classList.add('hidden');
+    // Afficher la section participant
+    document.getElementById('facilitatorStorySection').style.display = 'none';
+    document.getElementById('participantStorySection').style.display = 'block';
+
+    // Afficher le message d'attente par défaut
     document.getElementById('waitingForStory').classList.remove('hidden');
+    document.getElementById('participantStoryDisplay').classList.add('hidden');
 
     // Les actions ne sont pas visibles pour les participants
     document.getElementById('actionsSection').style.display = 'none';
@@ -261,14 +260,23 @@ function setupListeners() {
 
         if (currentPlayerRole === 'participant') {
             if (votingOpen) {
-                // Afficher la story et les cartes
+                // Cacher le message d'attente
                 document.getElementById('waitingForStory').classList.add('hidden');
+                // Afficher la story
                 document.getElementById('participantStoryDisplay').classList.remove('hidden');
+                // Afficher les cartes
                 document.getElementById('votingSection').style.display = 'block';
+                // Mettre à jour le statut
+                const voteStatus = document.getElementById('voteStatus');
+                if (voteStatus) {
+                    voteStatus.textContent = 'Sélectionnez une carte pour voter';
+                }
             } else {
-                // Cacher les cartes et afficher le message d'attente
+                // Afficher le message d'attente
                 document.getElementById('waitingForStory').classList.remove('hidden');
+                // Cacher la story
                 document.getElementById('participantStoryDisplay').classList.add('hidden');
+                // Cacher les cartes
                 document.getElementById('votingSection').style.display = 'none';
             }
         }
