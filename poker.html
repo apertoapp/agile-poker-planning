@@ -2,9 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Planning Poker - Session</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
 <div class="poker-container">
@@ -39,12 +39,12 @@
         <h3>📝 User Story à estimer</h3>
         <p class="hint-text">Saisissez la référence de la User Story que l'équipe doit estimer</p>
         <input
-                type="text"
+                class="story-input"
                 id="storyInput"
                 placeholder="Ex: US-123: Implémenter le login utilisateur"
-                class="story-input"
+                type="text"
         >
-        <button class="btn btn-primary" id="openVoteBtn" onclick="openVoting()" disabled>
+        <button class="btn btn-primary" disabled id="openVoteBtn" onclick="openVoting()">
             🚀 Ouvrir le vote
         </button>
         <p class="hint-text" style="margin-top: 10px;">
@@ -54,10 +54,10 @@
 
     <!-- Zone de story - PARTICIPANT -->
     <div class="story-section" id="participantStorySection" style="display: none;">
-        <div id="waitingForStory" class="message info">
+        <div class="message info" id="waitingForStory">
             ⏳ En attente que le facilitateur ouvre une session de vote...
         </div>
-        <div id="participantStoryDisplay" class="hidden">
+        <div class="hidden" id="participantStoryDisplay">
             <h3>📝 User Story à estimer</h3>
             <div class="story-display">
                 <div class="story-text" id="currentStory">En attente...</div>
@@ -76,7 +76,7 @@
 
     <!-- Actions -->
     <div class="actions-section" id="actionsSection">
-        <button class="btn btn-primary" id="revealBtn" onclick="revealVotes()" disabled>
+        <button class="btn btn-primary" disabled id="revealBtn" onclick="revealVotes()">
             👁️ Révéler les votes
         </button>
         <button class="btn btn-danger" id="resetBtn" onclick="resetVotes()">

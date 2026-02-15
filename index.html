@@ -2,9 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Agile Poker Planning</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
@@ -26,19 +26,19 @@
     </div>
 
     <!-- Formulaire Facilitateur -->
-    <div id="facilitatorForm" class="hidden">
+    <div class="hidden" id="facilitatorForm">
         <div class="form-box">
             <button class="back-link" onclick="showRoleChoice()">← Retour</button>
             <h2>🎬 Facilitateur</h2>
             <p class="form-description">Créez une nouvelle session et invitez votre équipe</p>
 
             <label for="facilitatorName"></label><input
-                    type="text"
-                    id="facilitatorName"
-                    placeholder="Votre nom (ex: Claude)"
-                    maxlength="20"
-                    autocomplete="off"
-            >
+                autocomplete="off"
+                id="facilitatorName"
+                maxlength="20"
+                placeholder="Votre nom (ex: Claude)"
+                type="text"
+        >
 
             <button class="btn btn-primary" onclick="createSession()">
                 ➕ Créer une nouvelle session
@@ -51,13 +51,13 @@
             <div class="join-existing">
                 <p class="hint">Si vous avez déjà une session en cours :</p>
                 <label for="facilitatorSessionCode"></label><input
-                        type="text"
-                        id="facilitatorSessionCode"
-                        placeholder="Code de session (ex: equipe37)"
-                        maxlength="20"
-                        autocomplete="off"
-                        class="session-code-input"
-                >
+                    autocomplete="off"
+                    class="session-code-input"
+                    id="facilitatorSessionCode"
+                    maxlength="20"
+                    placeholder="Code de session (ex: equipe37)"
+                    type="text"
+            >
                 <button class="btn btn-secondary" onclick="joinAsRole('facilitator')">
                     Rejoindre ma session
                 </button>
@@ -66,28 +66,28 @@
     </div>
 
     <!-- Formulaire Participant -->
-    <div id="participantForm" class="hidden">
+    <div class="hidden" id="participantForm">
         <div class="form-box">
             <button class="back-link" onclick="showRoleChoice()">← Retour</button>
             <h2>👥 Participant</h2>
             <p class="form-description">Rejoignez une session existante</p>
 
             <label for="participantName"></label><input
-                    type="text"
-                    id="participantName"
-                    placeholder="Votre nom (ex: Alice)"
-                    maxlength="20"
-                    autocomplete="off"
-            >
+                autocomplete="off"
+                id="participantName"
+                maxlength="20"
+                placeholder="Votre nom (ex: Alice)"
+                type="text"
+        >
 
             <label for="participantSessionCode"></label><input
-                    type="text"
-                    id="participantSessionCode"
-                    placeholder="Code de session (ex: equipe37)"
-                    maxlength="20"
-                    autocomplete="off"
-                    class="session-code-input"
-            >
+                autocomplete="off"
+                class="session-code-input"
+                id="participantSessionCode"
+                maxlength="20"
+                placeholder="Code de session (ex: equipe37)"
+                type="text"
+        >
 
             <button class="btn btn-primary" onclick="joinAsRole('participant')">
                 Rejoindre la session
