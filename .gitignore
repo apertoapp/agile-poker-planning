@@ -24,11 +24,6 @@ build/
 out/
 .cache/
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
 # OS
 Thumbs.db
 Desktop.ini
