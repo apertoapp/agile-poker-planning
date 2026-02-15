@@ -14,6 +14,7 @@ const CARD_VALUES = ['0', '1', '2', '3', '5', '8', '13', '?', '☕'];
 
 let currentSessionId = null;
 let currentPlayerName = null;
+let currentPlayerRole = null;
 let myPlayerId = null;
 let selectedCard = null;
 let votesRevealed = false;
@@ -41,9 +42,10 @@ function getMyPlayerId() {
 
 // ==================== SESSION INITIALIZATION ====================
 
-function initPokerSession(sessionId, playerName) {
+function initPokerSession(sessionId, playerName, playerRole) {
     currentSessionId = sessionId;
     currentPlayerName = playerName;
+    currentPlayerRole = playerRole || 'participant';
     myPlayerId = getMyPlayerId();
 
     // Références Gun
@@ -343,7 +345,9 @@ function hideResults() {
 // ==================== SHARING ====================
 
 function shareSession() {
-    const url = window.location.href;
+    // URL pour les participants (par défaut)
+    const baseUrl = window.location.origin + window.location.pathname.replace('poker.html', 'index.html');
+    const url = `${baseUrl}?session=${currentSessionId}`;
 
     // Try native share API first
     if (navigator.share) {

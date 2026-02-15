@@ -10,53 +10,135 @@
 <div class="container">
     <h1>🎯 Agile Poker Planning</h1>
     <p class="subtitle">
-        Planning Poker en temps réel - Aucune installation requise
+        Planning Poker en temps réel - Choisissez votre rôle
     </p>
 
-    <!-- Écran de connexion -->
-    <div id="loginScreen">
-        <div class="login-box">
-            <h2 id="loginTitle">👤 Entrez votre nom</h2>
-            <p id="sessionInfo" class="session-info-text hidden"></p>
+    <!-- Choix du rôle -->
+    <div id="roleChoice">
+        <div class="role-buttons">
+            <button class="role-btn facilitator" onclick="showFacilitatorForm()">
+                🎬 Je suis le facilitateur
+            </button>
+            <button class="role-btn participant" onclick="showParticipantForm()">
+                👥 Je suis un participant
+            </button>
+        </div>
+    </div>
 
-            <input
+    <!-- Formulaire Facilitateur -->
+    <div id="facilitatorForm" class="hidden">
+        <div class="form-box">
+            <button class="back-link" onclick="showRoleChoice()">← Retour</button>
+            <h2>🎬 Facilitateur</h2>
+            <p class="form-description">Créez une nouvelle session et invitez votre équipe</p>
+
+            <label for="facilitatorName"></label><input
                     type="text"
-                    id="playerName"
+                    id="facilitatorName"
                     placeholder="Votre nom (ex: Claude)"
                     maxlength="20"
                     autocomplete="off"
             >
 
-            <button class="btn btn-primary" id="joinBtn" onclick="joinSession()">
+            <button class="btn btn-primary" onclick="createSession()">
+                ➕ Créer une nouvelle session
+            </button>
+
+            <div class="divider">
+                <span>OU</span>
+            </div>
+
+            <div class="join-existing">
+                <p class="hint">Si vous avez déjà une session en cours :</p>
+                <label for="facilitatorSessionCode"></label><input
+                        type="text"
+                        id="facilitatorSessionCode"
+                        placeholder="Code de session (ex: equipe37)"
+                        maxlength="20"
+                        autocomplete="off"
+                        class="session-code-input"
+                >
+                <button class="btn btn-secondary" onclick="joinAsRole('facilitator')">
+                    Rejoindre ma session
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire Participant -->
+    <div id="participantForm" class="hidden">
+        <div class="form-box">
+            <button class="back-link" onclick="showRoleChoice()">← Retour</button>
+            <h2>👥 Participant</h2>
+            <p class="form-description">Rejoignez une session existante</p>
+
+            <label for="participantName"></label><input
+                    type="text"
+                    id="participantName"
+                    placeholder="Votre nom (ex: Alice)"
+                    maxlength="20"
+                    autocomplete="off"
+            >
+
+            <label for="participantSessionCode"></label><input
+                    type="text"
+                    id="participantSessionCode"
+                    placeholder="Code de session (ex: equipe37)"
+                    maxlength="20"
+                    autocomplete="off"
+                    class="session-code-input"
+            >
+
+            <button class="btn btn-primary" onclick="joinAsRole('participant')">
                 Rejoindre la session
             </button>
 
-            <p class="hint">💡 Si vous êtes le premier, une nouvelle session sera créée automatiquement</p>
+            <p class="hint">💡 Le facilitateur vous a partagé le code de session</p>
         </div>
     </div>
 </div>
 
 <!-- Gun.js -->
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-<script src="script.js"></script>
 <script>
     // Vérifier si une session existe dans l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const existingSessionId = urlParams.get('session');
+    const roleFromUrl = urlParams.get('role');
 
     if (existingSessionId) {
-        document.getElementById('loginTitle').textContent = '👥 Rejoindre la session';
-        document.getElementById('sessionInfo').textContent = `Session: ${existingSessionId}`;
-        document.getElementById('sessionInfo').classList.remove('hidden');
+        // Si URL avec session, proposer directement de rejoindre
+        if (roleFromUrl === 'facilitator') {
+            showFacilitatorForm();
+            document.getElementById('facilitatorSessionCode').value = existingSessionId;
+        } else {
+            showParticipantForm();
+            document.getElementById('participantSessionCode').value = existingSessionId;
+        }
     }
 
-    // Permettre Enter pour rejoindre
-    document.getElementById('playerName')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') joinSession();
-    });
+    function showRoleChoice() {
+        document.getElementById('roleChoice').classList.remove('hidden');
+        document.getElementById('facilitatorForm').classList.add('hidden');
+        document.getElementById('participantForm').classList.add('hidden');
+    }
 
-    function joinSession() {
-        const nameInput = document.getElementById('playerName');
+    function showFacilitatorForm() {
+        document.getElementById('roleChoice').classList.add('hidden');
+        document.getElementById('facilitatorForm').classList.remove('hidden');
+        document.getElementById('participantForm').classList.add('hidden');
+        document.getElementById('facilitatorName').focus();
+    }
+
+    function showParticipantForm() {
+        document.getElementById('roleChoice').classList.add('hidden');
+        document.getElementById('facilitatorForm').classList.add('hidden');
+        document.getElementById('participantForm').classList.remove('hidden');
+        document.getElementById('participantName').focus();
+    }
+
+    function createSession() {
+        const nameInput = document.getElementById('facilitatorName');
         const playerName = nameInput.value.trim();
 
         if (!playerName) {
@@ -65,27 +147,66 @@
             return;
         }
 
-        // Stocker le nom
+        // Générer un nouveau code de session
+        const sessionId = generateSessionId();
+
+        // Stocker le nom et le rôle
         localStorage.setItem('playerName', playerName);
+        localStorage.setItem('playerRole', 'facilitator');
 
         // Rediriger vers la session
-        if (existingSessionId) {
-            window.location.href = `poker.html?session=${existingSessionId}`;
-        } else {
-            // Créer une nouvelle session
-            const sessionId = generateSessionId();
-            window.location.href = `poker.html?session=${sessionId}`;
+        window.location.href = `poker.html?session=${sessionId}&role=facilitator`;
+    }
+
+    function joinAsRole(role) {
+        const nameInput = document.getElementById(role === 'facilitator' ? 'facilitatorName' : 'participantName');
+        const sessionInput = document.getElementById(role === 'facilitator' ? 'facilitatorSessionCode' : 'participantSessionCode');
+
+        const playerName = nameInput.value.trim();
+        const sessionCode = sessionInput.value.trim().toLowerCase();
+
+        if (!playerName) {
+            nameInput.classList.add('error-shake');
+            setTimeout(() => nameInput.classList.remove('error-shake'), 500);
+            return;
         }
+
+        if (!sessionCode) {
+            sessionInput.classList.add('error-shake');
+            setTimeout(() => sessionInput.classList.remove('error-shake'), 500);
+            return;
+        }
+
+        // Stocker le nom et le rôle
+        localStorage.setItem('playerName', playerName);
+        localStorage.setItem('playerRole', role);
+
+        // Rediriger vers la session
+        window.location.href = `poker.html?session=${sessionCode}&role=${role}`;
     }
 
     function generateSessionId() {
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let result = 'equipe';
-        for (let i = 0; i < 2; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
+        const adjectives = ['agile', 'rapide', 'super', 'mega', 'ultra', 'top'];
+        const numbers = Math.floor(Math.random() * 100);
+        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+        return adj + numbers;
     }
+
+    // Permettre Enter pour valider
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            if (!document.getElementById('facilitatorForm').classList.contains('hidden')) {
+                const sessionCode = document.getElementById('facilitatorSessionCode').value.trim();
+                if (sessionCode) {
+                    joinAsRole('facilitator');
+                } else {
+                    createSession();
+                }
+            } else if (!document.getElementById('participantForm').classList.contains('hidden')) {
+                joinAsRole('participant');
+            }
+        }
+    });
 </script>
 </body>
 </html>

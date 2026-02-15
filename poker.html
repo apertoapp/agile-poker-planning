@@ -7,97 +7,125 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="poker-container">
-        <!-- Header avec session info -->
-        <div class="poker-header">
-            <div class="session-info-header">
-                <h1>🎯 Planning Poker</h1>
+<div class="poker-container">
+    <!-- Header avec session info -->
+    <div class="poker-header">
+        <div class="session-info-header">
+            <h1>🎯 Planning Poker</h1>
+            <div class="header-badges">
                 <div class="session-badge-inline">
                     <span class="session-label">Session:</span>
                     <span class="session-id" id="sessionDisplay"></span>
                 </div>
+                <div class="role-badge-inline" id="roleBadge">
+                    <span class="role-icon" id="roleIcon"></span>
+                    <span class="role-text" id="roleText"></span>
+                </div>
             </div>
-            <button class="share-btn" onclick="shareSession()">
-                🔗 Partager
-            </button>
         </div>
+        <button class="share-btn" onclick="shareSession()">
+            🔗 Partager
+        </button>
+    </div>
 
-        <!-- Liste des joueurs -->
-        <div class="players-section">
-            <h3>👥 Joueurs connectés (<span id="playerCount">0</span>)</h3>
-            <div class="players-list" id="playersList"></div>
-        </div>
+    <!-- Liste des joueurs -->
+    <div class="players-section">
+        <h3>👥 Joueurs connectés (<span id="playerCount">0</span>)</h3>
+        <div class="players-list" id="playersList"></div>
+    </div>
 
-        <!-- Zone de story -->
-        <div class="story-section">
-            <h3>📝 User Story en cours</h3>
-            <input 
-                type="text" 
-                id="storyInput" 
+    <!-- Zone de story -->
+    <div class="story-section">
+        <h3>📝 User Story en cours</h3>
+        <label for="storyInput"></label><input
+                type="text"
+                id="storyInput"
                 placeholder="Ex: US-123: Login utilisateur"
                 class="story-input"
-            >
-        </div>
+        >
+    </div>
 
-        <!-- Cartes de vote -->
-        <div class="voting-section">
-            <h3>🃏 Votre vote</h3>
-            <div class="cards-grid" id="cardsGrid"></div>
-            <div class="vote-status" id="voteStatus">
-                Sélectionnez une carte pour voter
-            </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions-section">
-            <button class="btn btn-primary" id="revealBtn" onclick="revealVotes()">
-                👁️ Révéler les votes
-            </button>
-            <button class="btn btn-danger" id="resetBtn" onclick="resetVotes()">
-                🔄 Nouvelle story
-            </button>
-        </div>
-
-        <!-- Résultats -->
-        <div class="results-section hidden" id="resultsSection">
-            <h3>📊 Résultats</h3>
-            <div class="results-stats">
-                <div class="stat-box">
-                    <div class="stat-label">Moyenne</div>
-                    <div class="stat-value" id="avgValue">-</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Médiane</div>
-                    <div class="stat-value" id="medianValue">-</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Consensus</div>
-                    <div class="stat-value" id="consensusValue">-</div>
-                </div>
-            </div>
-            <div class="votes-grid" id="votesGrid"></div>
+    <!-- Cartes de vote -->
+    <div class="voting-section">
+        <h3>🃏 Votre vote</h3>
+        <div class="cards-grid" id="cardsGrid"></div>
+        <div class="vote-status" id="voteStatus">
+            Sélectionnez une carte pour voter
         </div>
     </div>
 
-    <!-- Gun.js -->
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="script.js"></script>
-    <script>
-        // Vérifier la présence d'une session
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session');
-        
-        if (!sessionId) {
-            window.location.href = 'index.html';
+    <!-- Actions -->
+    <div class="actions-section">
+        <button class="btn btn-primary" id="revealBtn" onclick="revealVotes()">
+            👁️ Révéler les votes
+        </button>
+        <button class="btn btn-danger" id="resetBtn" onclick="resetVotes()">
+            🔄 Nouvelle story
+        </button>
+    </div>
+
+    <!-- Résultats -->
+    <div class="results-section hidden" id="resultsSection">
+        <h3>📊 Résultats</h3>
+        <div class="results-stats">
+            <div class="stat-box">
+                <div class="stat-label">Moyenne</div>
+                <div class="stat-value" id="avgValue">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Médiane</div>
+                <div class="stat-value" id="medianValue">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Consensus</div>
+                <div class="stat-value" id="consensusValue">-</div>
+            </div>
+        </div>
+        <div class="votes-grid" id="votesGrid"></div>
+    </div>
+</div>
+
+<!-- Gun.js -->
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="script.js"></script>
+<script>
+    // Vérifier la présence d'une session et du rôle
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    const userRole = urlParams.get('role') || localStorage.getItem('playerRole') || 'participant';
+
+    if (!sessionId) {
+        window.location.href = 'index.html';
+    } else {
+        const playerName = localStorage.getItem('playerName');
+        if (!playerName) {
+            window.location.href = 'index.html?session=' + sessionId + '&role=' + userRole;
         } else {
-            const playerName = localStorage.getItem('playerName');
-            if (!playerName) {
-                window.location.href = 'index.html?session=' + sessionId;
+            // Stocker le rôle
+            localStorage.setItem('playerRole', userRole);
+
+            // Afficher le rôle dans l'interface
+            document.getElementById('sessionDisplay').textContent = sessionId;
+            const roleIcon = document.getElementById('roleIcon');
+            const roleText = document.getElementById('roleText');
+            const roleBadge = document.getElementById('roleBadge');
+
+            if (userRole === 'facilitator') {
+                roleIcon.textContent = '🎬';
+                roleText.textContent = 'Facilitateur';
+                roleBadge.classList.add('role-facilitator');
             } else {
-                document.getElementById('sessionDisplay').textContent = sessionId;
-                initPokerSession(sessionId, playerName);
+                roleIcon.textContent = '👥';
+                roleText.textContent = 'Participant';
+                roleBadge.classList.add('role-participant');
+                // Masquer les boutons de contrôle pour les participants
+                document.getElementById('revealBtn').style.display = 'none';
+                document.getElementById('resetBtn').style.display = 'none';
             }
+
+            initPokerSession(sessionId, playerName, userRole);
         }
-    </script>
+    }
+</script>
 </body>
 </html>
