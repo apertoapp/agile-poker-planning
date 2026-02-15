@@ -144,8 +144,7 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 
 ## 📞 Contact & Support
 
-**Auteur** : **Claude BUENO** - Coach Agile, Lean & AI-Native | Transformation des organisations à l’ère de l’IA  
-**LinkedIn** : [https://www.linkedin.com/in/claudebueno](https://www.linkedin.com/in/claudebueno)  
+**Auteur** : **Aperto App**
 **Usage** : 100% gratuit pour équipes/formation
 
 ```
