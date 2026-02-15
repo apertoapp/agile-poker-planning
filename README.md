@@ -1,2 +1,198 @@
-# agile-poker-planning
-Application Planning Poker autonome pour 8 participants maximum,
+# 🎯 Agile Poker Planning
+
+Application web simple pour réaliser des sessions de Planning Poker Agile en temps réel avec 8 participants maximum et 1 facilitateur.
+
+## 📋 Description
+
+Cette application permet aux équipes agiles de réaliser des estimations de tâches en utilisant la technique du Planning Poker. Elle fonctionne entièrement côté client, sans nécessiter de serveur backend.
+
+## ✨ Fonctionnalités
+
+### Pour les Participants
+- 🎴 Sélection d'une carte parmi 7 valeurs (0, 1, 2, 3, 5, 8, 13)
+- ⏱️ Visualisation du timer en temps réel
+- ✅ Validation du vote avec confirmation
+- 🔒 Verrouillage automatique après le vote
+
+### Pour le Facilitateur
+- ⚙️ Configuration du timer (10-600 secondes)
+- ▶️ Démarrage de session de vote
+- 📊 Suivi en temps réel du nombre de participants ayant voté
+- 🎯 Affichage des résultats à la fin du timer
+- 🔄 Réinitialisation pour une nouvelle session
+
+## 🚀 Installation
+
+### Option 1 : GitHub Pages (Recommandé)
+
+1. **Créez un nouveau repository sur GitHub**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/apertoapp/agile-poker-planning.git
+   git push -u origin main
+   ```
+
+2. **Activez GitHub Pages**
+    - Allez dans les Settings de votre repository
+    - Section "Pages"
+    - Source: "Deploy from a branch"
+    - Branch: "main" / "root"
+    - Cliquez sur "Save"
+
+3. **Accédez à votre application**
+    - URL: `https://votre-username.github.io/agile-poker/`
+
+### Option 2 : Serveur local
+
+```bash
+# Avec Python 3
+python -m http.server 8000
+
+# Avec Node.js
+npx http-server
+
+# Avec PHP
+php -S localhost:8000
+```
+
+Puis ouvrez `http://localhost:8000` dans votre navigateur.
+
+## 📂 Structure des fichiers
+
+```
+agile-poker/
+├── index.html          # Page d'accueil (choix du rôle)
+├── participant.html    # Interface participant
+├── facilitator.html    # Interface facilitateur
+├── style.css           # Styles CSS communs
+├── script.js           # Logique JavaScript
+└── README.md           # Documentation
+```
+
+## 🎮 Utilisation
+
+### Démarrage d'une session
+
+1. **Le facilitateur** :
+    - Ouvre l'application et clique sur "Je suis le facilitateur"
+    - Configure la durée du timer (par défaut 60 secondes)
+    - Clique sur "Démarrer le vote"
+
+2. **Les participants** :
+    - Ouvrent l'application et cliquent sur "Je suis un participant"
+    - Choisissent une carte en cliquant dessus
+    - Cliquent sur "Valider mon vote"
+
+3. **Fin de la session** :
+    - Le timer se déclenche automatiquement
+    - Les résultats s'affichent automatiquement à la fin du timer
+    - Le facilitateur peut réinitialiser pour une nouvelle session
+
+### Synchronisation multi-utilisateurs
+
+L'application utilise `localStorage` pour synchroniser les votes entre différents onglets/fenêtres du même navigateur. Pour une vraie session multi-utilisateurs sur différents appareils, vous devriez :
+
+- Soit ouvrir tous les participants sur le même appareil (différents onglets)
+- Soit implémenter une solution backend avec WebSockets ou Firebase
+
+## 🔧 Technologies utilisées
+
+- **HTML5** : Structure des pages
+- **CSS3** : Design responsive et animations
+- **JavaScript Vanilla** : Logique métier (aucune dépendance)
+- **localStorage** : Stockage temporaire des votes
+
+## ⚙️ Configuration
+
+### Modifier les valeurs des cartes
+
+Dans `script.js`, modifiez la constante :
+
+```javascript
+const CARD_VALUES = ['0', '1', '2', '3', '5', '8', '13'];
+```
+
+Exemples :
+- **Fibonacci complet** : `['0', '½', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?']`
+- **T-Shirt Sizing** : `['XS', 'S', 'M', 'L', 'XL', 'XXL']`
+- **Heures** : `['1h', '2h', '4h', '8h', '16h', '24h']`
+
+### Modifier le nombre maximum de participants
+
+Par défaut, l'application affiche "X / 8". Pour changer ce nombre, modifiez dans les fichiers HTML :
+
+```html
+<span id="voteCount">0</span> / 8
+```
+
+## 🎨 Personnalisation
+
+### Couleurs
+
+Les couleurs principales sont définies dans `style.css` via des gradients :
+
+```css
+/* Participant */
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+/* Facilitateur */
+background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+```
+
+### Son de fin
+
+Le son joué à la fin du timer est encodé en base64 dans `script.js`. Vous pouvez le remplacer par votre propre son :
+
+```javascript
+function playEndSound() {
+    const audio = new Audio('chemin/vers/votre/son.mp3');
+    audio.play();
+}
+```
+
+## 📱 Compatibilité
+
+- ✅ Chrome (dernière version)
+- ✅ Firefox (dernière version)
+- ✅ Safari (dernière version)
+- ✅ Edge (dernière version)
+- ✅ Mobile (iOS Safari, Chrome Android)
+
+## ⚠️ Limitations
+
+- Fonctionne uniquement avec `localStorage` (même navigateur/appareil)
+- Pas de persistance des données après fermeture du navigateur
+- Maximum 8 participants recommandé
+- Pas d'authentification ni de sécurité
+
+## 🔮 Améliorations futures
+
+- [ ] Backend avec WebSockets pour vraie synchronisation multi-utilisateurs
+- [ ] Mode anonyme (sans affichage des IDs)
+- [ ] Export des résultats en CSV
+- [ ] Historique des sessions
+- [ ] Choix de différents jeux de cartes
+- [ ] Mode sombre
+- [ ] Statistiques (moyenne, médiane)
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Vous êtes libre de l'utiliser, le modifier et le distribuer.
+
+## 👥 Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à :
+- Signaler des bugs
+- Proposer des nouvelles fonctionnalités
+- Soumettre des pull requests
+
+## 📞 Support
+
+Pour toute question ou problème, ouvrez une issue sur GitHub.
+
+---
+
+**Fait avec ❤️ pour les équipes Agiles**
