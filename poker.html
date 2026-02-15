@@ -2,107 +2,132 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Poker - Session</title>
-    <link href="style.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="poker-container">
-    <!-- Header avec session info -->
-    <div class="poker-header">
-        <div class="session-info-header">
-            <h1>🎯 Planning Poker</h1>
-            <div class="header-badges">
-                <div class="session-badge-inline">
-                    <span class="session-label">Session:</span>
-                    <span class="session-id" id="sessionDisplay"></span>
-                </div>
-                <div class="role-badge-inline" id="roleBadge">
-                    <span class="role-icon" id="roleIcon"></span>
-                    <span class="role-text" id="roleText"></span>
+    <!-- Écran de blocage pour participants -->
+    <div id="participantWaitingScreen" class="waiting-screen hidden">
+        <div class="waiting-content">
+            <div class="waiting-icon">⏳</div>
+            <h2>Session en attente</h2>
+            <p class="waiting-message">
+                Le facilitateur prépare la session de vote...
+            </p>
+            <div class="session-info-waiting">
+                <span class="session-label">Session:</span>
+                <span class="session-id" id="waitingSessionDisplay"></span>
+            </div>
+            <div class="connection-status">
+                <div class="pulse-dot"></div>
+                <span>Connexion en cours...</span>
+            </div>
+            <p class="hint-text">
+                💡 Cette page se mettra à jour automatiquement dès que le facilitateur ouvrira le vote
+            </p>
+        </div>
+    </div>
+
+    <!-- Interface principale (visible après ouverture) -->
+    <div id="mainInterface" class="hidden">
+        <!-- Header avec session info -->
+        <div class="poker-header">
+            <div class="session-info-header">
+                <h1>🎯 Planning Poker</h1>
+                <div class="header-badges">
+                    <div class="session-badge-inline">
+                        <span class="session-label">Session:</span>
+                        <span class="session-id" id="sessionDisplay"></span>
+                    </div>
+                    <div class="role-badge-inline" id="roleBadge">
+                        <span class="role-icon" id="roleIcon"></span>
+                        <span class="role-text" id="roleText"></span>
+                    </div>
                 </div>
             </div>
+            <button class="share-btn" onclick="shareSession()">
+                🔗 Partager
+            </button>
         </div>
-        <button class="share-btn" onclick="shareSession()">
-            🔗 Partager
-        </button>
-    </div>
 
-    <!-- Liste des joueurs -->
-    <div class="players-section">
-        <h3>👥 Joueurs connectés (<span id="playerCount">0</span>)</h3>
-        <div class="players-list" id="playersList"></div>
-    </div>
-
-    <!-- Zone de story - FACILITATEUR -->
-    <div class="story-section" id="facilitatorStorySection" style="display: none;">
-        <h3>📝 User Story à estimer</h3>
-        <p class="hint-text">Saisissez la référence de la User Story que l'équipe doit estimer</p>
-        <input
-                class="story-input"
-                id="storyInput"
-                placeholder="Ex: US-123: Implémenter le login utilisateur"
-                type="text"
-        >
-        <button class="btn btn-primary" disabled id="openVoteBtn" onclick="openVoting()">
-            🚀 Ouvrir le vote
-        </button>
-        <p class="hint-text" style="margin-top: 10px;">
-            💡 Une fois le vote ouvert, les participants pourront voir la story et voter
-        </p>
-    </div>
-
-    <!-- Zone de story - PARTICIPANT -->
-    <div class="story-section" id="participantStorySection" style="display: none;">
-        <div class="message info" id="waitingForStory">
-            ⏳ En attente que le facilitateur ouvre une session de vote...
+        <!-- Liste des joueurs -->
+        <div class="players-section">
+            <h3>👥 Joueurs connectés (<span id="playerCount">0</span>)</h3>
+            <div class="players-list" id="playersList"></div>
         </div>
-        <div class="hidden" id="participantStoryDisplay">
+
+        <!-- Zone de story - FACILITATEUR -->
+        <div class="story-section" id="facilitatorStorySection" style="display: none;">
             <h3>📝 User Story à estimer</h3>
-            <div class="story-display">
-                <div class="story-text" id="currentStory">En attente...</div>
+            <p class="hint-text">Saisissez la référence de la User Story que l'équipe doit estimer</p>
+            <input
+                    type="text"
+                    id="storyInput"
+                    placeholder="Ex: US-123: Implémenter le login utilisateur"
+                    class="story-input"
+            >
+            <button class="btn btn-primary" id="openVoteBtn" onclick="openVoting()" disabled>
+                🚀 Ouvrir le vote
+            </button>
+            <p class="hint-text" style="margin-top: 10px;">
+                💡 Une fois le vote ouvert, les participants pourront voir la story et voter
+            </p>
+        </div>
+
+        <!-- Zone de story - PARTICIPANT -->
+        <div class="story-section" id="participantStorySection" style="display: none;">
+            <div id="waitingForStory" class="message info">
+                ⏳ En attente que le facilitateur ouvre une session de vote...
+            </div>
+            <div id="participantStoryDisplay" class="hidden">
+                <h3>📝 User Story à estimer</h3>
+                <div class="story-display">
+                    <div class="story-text" id="currentStory">En attente...</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Cartes de vote - UNIQUEMENT POUR LES PARTICIPANTS -->
-    <div class="voting-section" id="votingSection" style="display: none;">
-        <h3>🃏 Votre vote</h3>
-        <div class="cards-grid" id="cardsGrid"></div>
-        <div class="vote-status" id="voteStatus">
-            En attente de l'ouverture du vote...
-        </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions-section" id="actionsSection">
-        <button class="btn btn-primary" disabled id="revealBtn" onclick="revealVotes()">
-            👁️ Révéler les votes
-        </button>
-        <button class="btn btn-danger" id="resetBtn" onclick="resetVotes()">
-            🔄 Nouvelle story
-        </button>
-    </div>
-
-    <!-- Résultats -->
-    <div class="results-section hidden" id="resultsSection">
-        <h3>📊 Résultats</h3>
-        <div class="results-stats">
-            <div class="stat-box">
-                <div class="stat-label">Moyenne</div>
-                <div class="stat-value" id="avgValue">-</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Médiane</div>
-                <div class="stat-value" id="medianValue">-</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Consensus</div>
-                <div class="stat-value" id="consensusValue">-</div>
+        <!-- Cartes de vote - UNIQUEMENT POUR LES PARTICIPANTS -->
+        <div class="voting-section" id="votingSection" style="display: none;">
+            <h3>🃏 Votre vote</h3>
+            <div class="cards-grid" id="cardsGrid"></div>
+            <div class="vote-status" id="voteStatus">
+                En attente de l'ouverture du vote...
             </div>
         </div>
-        <div class="votes-grid" id="votesGrid"></div>
-    </div>
+
+        <!-- Actions -->
+        <div class="actions-section" id="actionsSection">
+            <button class="btn btn-primary" id="revealBtn" onclick="revealVotes()" disabled>
+                👁️ Révéler les votes
+            </button>
+            <button class="btn btn-danger" id="resetBtn" onclick="resetVotes()">
+                🔄 Nouvelle story
+            </button>
+        </div>
+
+        <!-- Résultats -->
+        <div class="results-section hidden" id="resultsSection">
+            <h3>📊 Résultats</h3>
+            <div class="results-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Moyenne</div>
+                    <div class="stat-value" id="avgValue">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Médiane</div>
+                    <div class="stat-value" id="medianValue">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Consensus</div>
+                    <div class="stat-value" id="consensusValue">-</div>
+                </div>
+            </div>
+            <div class="votes-grid" id="votesGrid"></div>
+        </div>
+    </div><!-- Fin mainInterface -->
 </div>
 
 <!-- Gun.js -->
@@ -124,24 +149,71 @@
             // Stocker le rôle
             localStorage.setItem('playerRole', userRole);
 
-            // Afficher le rôle dans l'interface
-            document.getElementById('sessionDisplay').textContent = sessionId;
-            const roleIcon = document.getElementById('roleIcon');
-            const roleText = document.getElementById('roleText');
-            const roleBadge = document.getElementById('roleBadge');
-
             if (userRole === 'facilitator') {
-                roleIcon.textContent = '🎬';
-                roleText.textContent = 'Facilitateur';
-                roleBadge.classList.add('role-facilitator');
+                // Le facilitateur accède directement
+                showMainInterface();
+                setupFacilitatorDisplay();
+                initPokerSession(sessionId, playerName, userRole);
             } else {
-                roleIcon.textContent = '👥';
-                roleText.textContent = 'Participant';
-                roleBadge.classList.add('role-participant');
-            }
+                // Le participant doit attendre l'ouverture
+                document.getElementById('waitingSessionDisplay').textContent = sessionId;
+                document.getElementById('participantWaitingScreen').classList.remove('hidden');
 
-            initPokerSession(sessionId, playerName, userRole);
+                // Vérifier l'état du vote en temps réel
+                checkVotingStateForParticipant(sessionId, playerName, userRole);
+            }
         }
+    }
+
+    function showMainInterface() {
+        document.getElementById('participantWaitingScreen').classList.add('hidden');
+        document.getElementById('mainInterface').classList.remove('hidden');
+    }
+
+    function setupFacilitatorDisplay() {
+        document.getElementById('sessionDisplay').textContent = sessionId;
+        const roleIcon = document.getElementById('roleIcon');
+        const roleText = document.getElementById('roleText');
+        const roleBadge = document.getElementById('roleBadge');
+
+        roleIcon.textContent = '🎬';
+        roleText.textContent = 'Facilitateur';
+        roleBadge.classList.add('role-facilitator');
+    }
+
+    function setupParticipantDisplay() {
+        document.getElementById('sessionDisplay').textContent = sessionId;
+        const roleIcon = document.getElementById('roleIcon');
+        const roleText = document.getElementById('roleText');
+        const roleBadge = document.getElementById('roleBadge');
+
+        roleIcon.textContent = '👥';
+        roleText.textContent = 'Participant';
+        roleBadge.classList.add('role-participant');
+    }
+
+    function checkVotingStateForParticipant(sessionId, playerName, userRole) {
+        // Initialiser Gun
+        const gun = Gun([
+            'https://gun-manhattan.herokuapp.com/gun',
+            'https://gun-us.herokuapp.com/gun'
+        ]);
+
+        const sessionRef = gun.get('poker_sessions').get(sessionId);
+        const votingStateRef = sessionRef.get('votingState');
+
+        // Écouter l'état d'ouverture du vote
+        votingStateRef.get('open').on((open) => {
+            if (open) {
+                // Le vote est ouvert ! Débloquer l'interface
+                showMainInterface();
+                setupParticipantDisplay();
+                initPokerSession(sessionId, playerName, userRole);
+
+                // Arrêter l'écoute
+                votingStateRef.get('open').off();
+            }
+        });
     }
 </script>
 </body>
