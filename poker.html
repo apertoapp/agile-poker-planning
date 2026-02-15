@@ -173,7 +173,7 @@
                 initPokerSession(sessionId, playerName, userRole);
             } else {
                 // Le participant doit attendre l'ouverture
-                document.getElementById('waitingSessionDisplay').textContent = sessionId;
+                document.getElementById('waitingSessionDisplay').textContent = sanitizeInput(sessionId);
                 document.getElementById('participantWaitingScreen').classList.remove('hidden');
 
                 // Vérifier l'état du vote en temps réel
@@ -188,7 +188,7 @@
     }
 
     function setupFacilitatorDisplay() {
-        document.getElementById('sessionDisplay').textContent = sessionId;
+        document.getElementById('sessionDisplay').textContent = sanitizeInput(sessionId);
         const roleIcon = document.getElementById('roleIcon');
         const roleText = document.getElementById('roleText');
         const roleBadge = document.getElementById('roleBadge');
@@ -199,7 +199,7 @@
     }
 
     function setupParticipantDisplay() {
-        document.getElementById('sessionDisplay').textContent = sessionId;
+        document.getElementById('sessionDisplay').textContent = sanitizeInput(sessionId);
         const roleIcon = document.getElementById('roleIcon');
         const roleText = document.getElementById('roleText');
         const roleBadge = document.getElementById('roleBadge');
@@ -209,6 +209,12 @@
         roleBadge.classList.add('role-participant');
     }
 
+    // Fonction de sanitization
+    function sanitizeInput(input) {
+        if (typeof input !== 'string') return '';
+        return input.trim().slice(0, 200).replace(/[<>"'`]/g, '');
+    }
+
     function checkVotingStateForParticipant(sessionId, playerName, userRole) {
         // Initialiser Gun
         const gun = Gun([
@@ -216,7 +222,7 @@
             'https://gun-us.herokuapp.com/gun'
         ]);
 
-        const sessionRef = gun.get('poker_sessions').get(sessionId);
+        const sessionRef = gun.get('poker_sessions').get(sanitizeInput(sessionId));
         const votingStateRef = sessionRef.get('votingState');
         const storyRef = sessionRef.get('story');
 
@@ -227,7 +233,7 @@
                 document.getElementById('waitingTitle').textContent = 'Story prête !';
                 document.getElementById('waitingMessage').textContent = 'Le facilitateur va ouvrir le vote...';
                 document.getElementById('storyPreview').classList.remove('hidden');
-                document.getElementById('storyPreviewText').textContent = storyText;
+                document.getElementById('storyPreviewText').textContent = sanitizeInput(storyText);
             } else {
                 // Pas de story encore
                 document.getElementById('waitingTitle').textContent = 'Session en attente';
