@@ -1,0 +1,475 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ==================== LOGIN SCREEN ==================== */
+
+.container {
+    max-width: 500px;
+    margin: 100px auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+h2 {
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+    font-size: 1.1em;
+}
+
+.login-box {
+    margin-top: 30px;
+}
+
+.session-info-text {
+    text-align: center;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    color: #667eea;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.login-box input[type="text"] {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s;
+}
+
+.login-box input[type="text"]:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.hint {
+    text-align: center;
+    color: #999;
+    font-size: 0.9em;
+    margin-top: 20px;
+}
+
+.error-shake {
+    animation: shake 0.5s;
+    border-color: #f5576c !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* ==================== POKER INTERFACE ==================== */
+
+.poker-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+    animation: fadeIn 0.5s ease;
+}
+
+.poker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.session-info-header {
+    flex: 1;
+}
+
+.session-info-header h1 {
+    margin-bottom: 10px;
+    font-size: 2em;
+}
+
+.session-badge-inline {
+    display: inline-flex;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid #667eea;
+}
+
+.session-label {
+    color: #666;
+    margin-right: 8px;
+    font-size: 0.9em;
+}
+
+.session-id {
+    color: #667eea;
+    font-weight: bold;
+    font-size: 1.2em;
+    letter-spacing: 1px;
+}
+
+.share-btn {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ==================== PLAYERS SECTION ==================== */
+
+.players-section {
+    margin-bottom: 30px;
+}
+
+.players-section h3 {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.players-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.player-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.player-card.current-player {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.player-vote {
+    font-size: 1.2em;
+}
+
+/* ==================== STORY SECTION ==================== */
+
+.story-section {
+    margin-bottom: 30px;
+}
+
+.story-section h3 {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.story-input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    transition: border-color 0.3s;
+}
+
+.story-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ==================== VOTING SECTION ==================== */
+
+.voting-section {
+    margin-bottom: 30px;
+}
+
+.voting-section h3 {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.poker-card {
+    aspect-ratio: 2/3;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.poker-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.poker-card.selected {
+    border-color: #f5576c;
+    box-shadow: 0 0 25px rgba(245, 87, 108, 0.6);
+    transform: translateY(-10px);
+}
+
+.vote-status {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    color: #666;
+    font-weight: bold;
+}
+
+.vote-status.voted {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* ==================== ACTIONS ==================== */
+
+.actions-section {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px 30px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== RESULTS ==================== */
+
+.results-section {
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.results-section h3 {
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.results-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    color: #667eea;
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+.votes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.vote-result-card {
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.vote-player-name {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.vote-card-value {
+    font-size: 3em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+/* ==================== UTILITIES ==================== */
+
+.hidden {
+    display: none !important;
+}
+
+/* ==================== NOTIFICATIONS ==================== */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    border-left: 5px solid #38ef7d;
+}
+
+.notification-warning {
+    border-left: 5px solid #f5576c;
+}
+
+.notification-info {
+    border-left: 5px solid #667eea;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+    .poker-container {
+        padding: 20px;
+    }
+
+    .poker-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .share-btn {
+        width: 100%;
+    }
+
+    .cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .results-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .actions-section {
+        flex-direction: column;
+    }
+
+    .votes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .poker-card {
+        font-size: 2em;
+    }
+}

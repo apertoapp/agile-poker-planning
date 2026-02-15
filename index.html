@@ -4,22 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agile Poker Planning</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
     <h1>🎯 Agile Poker Planning</h1>
     <p class="subtitle">
-        Choisissez votre rôle pour commencer la session de vote
+        Planning Poker en temps réel - Aucune installation requise
     </p>
-    <div class="home-buttons">
-        <a href="app/participant.html" class="role-btn participant">
-            👥 Je suis un participant
-        </a>
-        <a href="app/facilitator.html" class="role-btn facilitator">
-            🎬 Je suis le facilitateur
-        </a>
+
+    <!-- Écran de connexion -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2 id="loginTitle">👤 Entrez votre nom</h2>
+            <p id="sessionInfo" class="session-info-text hidden"></p>
+
+            <input
+                    type="text"
+                    id="playerName"
+                    placeholder="Votre nom (ex: Claude)"
+                    maxlength="20"
+                    autocomplete="off"
+            >
+
+            <button class="btn btn-primary" id="joinBtn" onclick="joinSession()">
+                Rejoindre la session
+            </button>
+
+            <p class="hint">💡 Si vous êtes le premier, une nouvelle session sera créée automatiquement</p>
+        </div>
     </div>
 </div>
+
+<!-- Gun.js -->
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="script.js"></script>
+<script>
+    // Vérifier si une session existe dans l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const existingSessionId = urlParams.get('session');
+
+    if (existingSessionId) {
+        document.getElementById('loginTitle').textContent = '👥 Rejoindre la session';
+        document.getElementById('sessionInfo').textContent = `Session: ${existingSessionId}`;
+        document.getElementById('sessionInfo').classList.remove('hidden');
+    }
+
+    // Permettre Enter pour rejoindre
+    document.getElementById('playerName')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') joinSession();
+    });
+
+    function joinSession() {
+        const nameInput = document.getElementById('playerName');
+        const playerName = nameInput.value.trim();
+
+        if (!playerName) {
+            nameInput.classList.add('error-shake');
+            setTimeout(() => nameInput.classList.remove('error-shake'), 500);
+            return;
+        }
+
+        // Stocker le nom
+        localStorage.setItem('playerName', playerName);
+
+        // Rediriger vers la session
+        if (existingSessionId) {
+            window.location.href = `poker.html?session=${existingSessionId}`;
+        } else {
+            // Créer une nouvelle session
+            const sessionId = generateSessionId();
+            window.location.href = `poker.html?session=${sessionId}`;
+        }
+    }
+
+    function generateSessionId() {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = 'equipe';
+        for (let i = 0; i < 2; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+</script>
 </body>
 </html>
