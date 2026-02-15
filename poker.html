@@ -12,17 +12,27 @@
     <div id="participantWaitingScreen" class="waiting-screen hidden">
         <div class="waiting-content">
             <div class="waiting-icon">⏳</div>
-            <h2>Session en attente</h2>
-            <p class="waiting-message">
+            <h2 id="waitingTitle">Session en attente</h2>
+            <p class="waiting-message" id="waitingMessage">
                 Le facilitateur prépare la session de vote...
             </p>
+
+            <!-- Affichage de la story une fois saisie -->
+            <div id="storyPreview" class="story-preview hidden">
+                <div class="story-preview-label">📝 Story prête :</div>
+                <div class="story-preview-text" id="storyPreviewText"></div>
+                <div class="waiting-for-open">
+                    En attente de l'ouverture par le facilitateur...
+                </div>
+            </div>
+
             <div class="session-info-waiting">
                 <span class="session-label">Session:</span>
                 <span class="session-id" id="waitingSessionDisplay"></span>
             </div>
             <div class="connection-status">
                 <div class="pulse-dot"></div>
-                <span>Connexion en cours...</span>
+                <span>Connecté - En attente</span>
             </div>
             <p class="hint-text">
                 💡 Cette page se mettra à jour automatiquement dès que le facilitateur ouvrira le vote
@@ -68,12 +78,19 @@
                     placeholder="Ex: US-123: Implémenter le login utilisateur"
                     class="story-input"
             >
-            <button class="btn btn-primary" id="openVoteBtn" onclick="openVoting()" disabled>
-                🚀 Ouvrir le vote
-            </button>
-            <p class="hint-text" style="margin-top: 10px;">
-                💡 Une fois le vote ouvert, les participants pourront voir la story et voter
-            </p>
+
+            <!-- Zone d'ouverture du vote -->
+            <div class="vote-opening-section" id="voteOpeningSection">
+                <div class="ready-indicator hidden" id="readyIndicator">
+                    ✅ Story saisie - Prêt à ouvrir le vote !
+                </div>
+                <button class="btn btn-primary btn-open-vote" id="openVoteBtn" onclick="openVoting()" disabled>
+                    🚀 Ouvrir le vote
+                </button>
+                <p class="hint-text">
+                    💡 Une fois le vote ouvert, tous les participants seront débloqués instantanément
+                </p>
+            </div>
         </div>
 
         <!-- Zone de story - PARTICIPANT -->
@@ -201,6 +218,23 @@
 
         const sessionRef = gun.get('poker_sessions').get(sessionId);
         const votingStateRef = sessionRef.get('votingState');
+        const storyRef = sessionRef.get('story');
+
+        // Écouter la story
+        storyRef.get('text').on((storyText) => {
+            if (storyText && storyText.trim()) {
+                // Afficher la story dans l'écran d'attente
+                document.getElementById('waitingTitle').textContent = 'Story prête !';
+                document.getElementById('waitingMessage').textContent = 'Le facilitateur va ouvrir le vote...';
+                document.getElementById('storyPreview').classList.remove('hidden');
+                document.getElementById('storyPreviewText').textContent = storyText;
+            } else {
+                // Pas de story encore
+                document.getElementById('waitingTitle').textContent = 'Session en attente';
+                document.getElementById('waitingMessage').textContent = 'Le facilitateur prépare la session de vote...';
+                document.getElementById('storyPreview').classList.add('hidden');
+            }
+        });
 
         // Écouter l'état d'ouverture du vote
         votingStateRef.get('open').on((open) => {
@@ -212,6 +246,7 @@
 
                 // Arrêter l'écoute
                 votingStateRef.get('open').off();
+                storyRef.get('text').off();
             }
         });
     }

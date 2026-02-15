@@ -88,6 +88,7 @@ function setupFacilitatorUI() {
     // Setup story input avec validation
     const storyInput = document.getElementById('storyInput');
     const openBtn = document.getElementById('openVoteBtn');
+    const readyIndicator = document.getElementById('readyIndicator');
 
     let storyTimeout;
     storyInput.addEventListener('input', (e) => {
@@ -95,7 +96,15 @@ function setupFacilitatorUI() {
         const story = e.target.value.trim();
 
         // Activer le bouton seulement si story non vide
-        openBtn.disabled = !story;
+        if (story) {
+            openBtn.disabled = false;
+            openBtn.classList.add('btn-ready');
+            readyIndicator.classList.remove('hidden');
+        } else {
+            openBtn.disabled = true;
+            openBtn.classList.remove('btn-ready');
+            readyIndicator.classList.add('hidden');
+        }
 
         // Sauvegarder la story après 500ms
         storyTimeout = setTimeout(() => {
