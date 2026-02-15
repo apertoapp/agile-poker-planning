@@ -350,11 +350,38 @@ h2 {
     border: 2px solid #ddd;
     border-radius: 10px;
     transition: border-color 0.3s;
+    margin-bottom: 15px;
 }
 
 .story-input:focus {
     outline: none;
     border-color: #667eea;
+}
+
+.story-input:disabled {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.story-display {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 2px solid #667eea;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+}
+
+.story-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.story-text {
+    font-size: 1.5em;
+    color: #333;
+    font-weight: bold;
 }
 
 /* ==================== VOTING SECTION ==================== */

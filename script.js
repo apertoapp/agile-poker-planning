@@ -18,10 +18,12 @@ let currentPlayerRole = null;
 let myPlayerId = null;
 let selectedCard = null;
 let votesRevealed = false;
+let votingOpen = false;
 let sessionRef = null;
 let playersRef = null;
 let votesRef = null;
 let storyRef = null;
+let votingStateRef = null;
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -53,16 +55,71 @@ function initPokerSession(sessionId, playerName, playerRole) {
     playersRef = sessionRef.get('players');
     votesRef = sessionRef.get('votes');
     storyRef = sessionRef.get('story');
+    votingStateRef = sessionRef.get('votingState');
 
     // Rejoindre la session
     joinAsPlayer();
 
-    // Setup UI
-    renderCards();
+    // Setup UI selon le rôle
+    if (currentPlayerRole === 'facilitator') {
+        setupFacilitatorUI();
+    } else {
+        setupParticipantUI();
+    }
+
+    // Setup listeners
     setupListeners();
 
     // Heartbeat pour maintenir la présence
     startHeartbeat();
+}
+
+function setupFacilitatorUI() {
+    // Le facilitateur ne vote pas
+    document.getElementById('votingSection').style.display = 'none';
+
+    // Afficher l'input de story
+    document.getElementById('facilitatorStoryInput').classList.remove('hidden');
+    document.getElementById('participantStoryDisplay').classList.add('hidden');
+    document.getElementById('waitingForStory').classList.add('hidden');
+
+    // Les actions sont visibles
+    document.getElementById('actionsSection').style.display = 'flex';
+
+    // Setup story input avec synchronisation
+    const storyInput = document.getElementById('storyInput');
+    let storyTimeout;
+    storyInput.addEventListener('input', (e) => {
+        clearTimeout(storyTimeout);
+        const story = e.target.value.trim();
+
+        // Activer le bouton si story non vide
+        const openBtn = document.getElementById('openVoteBtn');
+        if (story) {
+            openBtn.disabled = false;
+        } else {
+            openBtn.disabled = true;
+        }
+
+        // Sauvegarder la story après 500ms
+        storyTimeout = setTimeout(() => {
+            storyRef.get('text').put(story);
+        }, 500);
+    });
+}
+
+function setupParticipantUI() {
+    // Le participant peut voter
+    document.getElementById('votingSection').style.display = 'block';
+    renderCards();
+
+    // Afficher la zone d'attente par défaut
+    document.getElementById('facilitatorStoryInput').classList.add('hidden');
+    document.getElementById('participantStoryDisplay').classList.add('hidden');
+    document.getElementById('waitingForStory').classList.remove('hidden');
+
+    // Les actions ne sont pas visibles pour les participants
+    document.getElementById('actionsSection').style.display = 'none';
 }
 
 function joinAsPlayer() {
@@ -119,6 +176,11 @@ function renderCards() {
 }
 
 function selectCard(value, cardElement) {
+    if (!votingOpen) {
+        showNotification('Le vote n\'est pas encore ouvert', 'warning');
+        return;
+    }
+
     if (votesRevealed) {
         showNotification('Les votes sont déjà révélés', 'warning');
         return;
@@ -156,6 +218,18 @@ function setupListeners() {
     votesRef.map().on((vote, playerId) => {
         if (playerId === '_' || playerId === '#') return;
         updatePlayersList();
+
+        // Activer le bouton révéler si au moins un vote
+        if (currentPlayerRole === 'facilitator' && votingOpen) {
+            votesRef.once((votes) => {
+                const hasVotes = votes && Object.keys(votes).some(k => k !== '_' && k !== '#');
+                const revealBtn = document.getElementById('revealBtn');
+                if (revealBtn) {
+                    revealBtn.disabled = !hasVotes;
+                }
+            });
+        }
+
         if (votesRevealed) {
             displayResults();
         }
@@ -163,8 +237,11 @@ function setupListeners() {
 
     // Écouter la story
     storyRef.get('text').on((text) => {
-        if (text && text !== document.getElementById('storyInput').value) {
-            document.getElementById('storyInput').value = text;
+        if (currentPlayerRole === 'participant' && text) {
+            const currentStoryEl = document.getElementById('currentStory');
+            if (currentStoryEl) {
+                currentStoryEl.textContent = text;
+            }
         }
     });
 
@@ -178,17 +255,31 @@ function setupListeners() {
         }
     });
 
-    // Setup story input
-    const storyInput = document.getElementById('storyInput');
-    if (storyInput) {
-        let storyTimeout;
-        storyInput.addEventListener('input', (e) => {
-            clearTimeout(storyTimeout);
-            storyTimeout = setTimeout(() => {
-                storyRef.get('text').put(e.target.value);
-            }, 500);
-        });
-    }
+    // Écouter l'état d'ouverture du vote
+    votingStateRef.get('open').on((open) => {
+        votingOpen = !!open;
+
+        if (currentPlayerRole === 'participant') {
+            if (votingOpen) {
+                // Afficher la story et les cartes
+                document.getElementById('waitingForStory').classList.add('hidden');
+                document.getElementById('participantStoryDisplay').classList.remove('hidden');
+                document.getElementById('votingSection').style.display = 'block';
+            } else {
+                // Cacher les cartes et afficher le message d'attente
+                document.getElementById('waitingForStory').classList.remove('hidden');
+                document.getElementById('participantStoryDisplay').classList.add('hidden');
+                document.getElementById('votingSection').style.display = 'none';
+            }
+        }
+
+        if (currentPlayerRole === 'facilitator') {
+            const openBtn = document.getElementById('openVoteBtn');
+            if (openBtn) {
+                openBtn.style.display = votingOpen ? 'none' : 'block';
+            }
+        }
+    });
 }
 
 function updatePlayersList() {
@@ -246,6 +337,31 @@ function updatePlayersList() {
 
 // ==================== VOTING ACTIONS ====================
 
+function openVoting() {
+    const storyInput = document.getElementById('storyInput');
+    const story = storyInput.value.trim();
+
+    if (!story) {
+        showNotification('Veuillez saisir une User Story', 'warning');
+        storyInput.focus();
+        return;
+    }
+
+    // Sauvegarder la story
+    storyRef.get('text').put(story);
+
+    // Ouvrir le vote
+    votingStateRef.get('open').put(true);
+
+    // Masquer le bouton "Ouvrir le vote"
+    document.getElementById('openVoteBtn').style.display = 'none';
+
+    // Désactiver l'input
+    storyInput.disabled = true;
+
+    showNotification('Vote ouvert ! Les participants peuvent maintenant voter', 'success');
+}
+
 function revealVotes() {
     sessionRef.get('revealed').put(true);
     displayResults();
@@ -262,6 +378,27 @@ function resetVotes() {
     // Clear revealed state
     sessionRef.get('revealed').put(false);
 
+    // Fermer le vote
+    votingStateRef.get('open').put(false);
+
+    // Réactiver l'input story et vider
+    const storyInput = document.getElementById('storyInput');
+    if (storyInput) {
+        storyInput.disabled = false;
+        storyInput.value = '';
+        storyInput.focus();
+    }
+
+    // Réafficher le bouton "Ouvrir le vote"
+    const openBtn = document.getElementById('openVoteBtn');
+    if (openBtn) {
+        openBtn.style.display = 'block';
+        openBtn.disabled = true;
+    }
+
+    // Clear story
+    storyRef.get('text').put('');
+
     // Clear local selection
     selectedCard = null;
     document.querySelectorAll('.poker-card').forEach(c => {
@@ -269,8 +406,11 @@ function resetVotes() {
     });
 
     // Update status
-    document.getElementById('voteStatus').textContent = 'Sélectionnez une carte pour voter';
-    document.getElementById('voteStatus').className = 'vote-status';
+    const voteStatus = document.getElementById('voteStatus');
+    if (voteStatus) {
+        voteStatus.textContent = 'Sélectionnez une carte pour voter';
+        voteStatus.className = 'vote-status';
+    }
 
     // Hide results
     hideResults();

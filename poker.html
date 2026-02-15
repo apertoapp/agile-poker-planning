@@ -36,17 +36,31 @@
 
     <!-- Zone de story -->
     <div class="story-section">
-        <h3>📝 User Story en cours</h3>
-        <label for="storyInput"></label><input
-                type="text"
-                id="storyInput"
-                placeholder="Ex: US-123: Login utilisateur"
-                class="story-input"
-        >
+        <h3>📝 User Story</h3>
+        <div id="facilitatorStoryInput" class="hidden">
+            <input
+                    type="text"
+                    id="storyInput"
+                    placeholder="Ex: US-123: Login utilisateur"
+                    class="story-input"
+            >
+            <button class="btn btn-primary" id="openVoteBtn" onclick="openVoting()">
+                🚀 Ouvrir le vote
+            </button>
+        </div>
+        <div id="participantStoryDisplay" class="hidden">
+            <div class="story-display">
+                <div class="story-label">Story en cours :</div>
+                <div class="story-text" id="currentStory">En attente...</div>
+            </div>
+        </div>
+        <div id="waitingForStory" class="message info hidden">
+            ⏳ En attente que le facilitateur ouvre une session de vote...
+        </div>
     </div>
 
-    <!-- Cartes de vote -->
-    <div class="voting-section">
+    <!-- Cartes de vote (uniquement pour participants) -->
+    <div class="voting-section" id="votingSection">
         <h3>🃏 Votre vote</h3>
         <div class="cards-grid" id="cardsGrid"></div>
         <div class="vote-status" id="voteStatus">
@@ -55,8 +69,8 @@
     </div>
 
     <!-- Actions -->
-    <div class="actions-section">
-        <button class="btn btn-primary" id="revealBtn" onclick="revealVotes()">
+    <div class="actions-section" id="actionsSection">
+        <button class="btn btn-primary" id="revealBtn" onclick="revealVotes()" disabled>
             👁️ Révéler les votes
         </button>
         <button class="btn btn-danger" id="resetBtn" onclick="resetVotes()">
