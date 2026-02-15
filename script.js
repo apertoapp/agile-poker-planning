@@ -40,11 +40,11 @@ function sanitizeInput(input) {
     return input
         .trim()
         .slice(0, 200) // Max 200 characters
-        .replace(/[<>\"'`]/g, ''); // Remove potentially dangerous chars
+        .replace(/[<>"'`]/g, ''); // Remove potentially dangerous chars
 }
 
 function generatePlayerId() {
-    return 'p_' + Math.random().toString(36).substr(2, 9);
+    return 'p_' + Math.random().toString(36).substring(2, 11);
 }
 
 function getMyPlayerId() {
@@ -369,7 +369,7 @@ function updatePlayersList() {
                 container.appendChild(playerCard);
             });
 
-            if (countEl) countEl.textContent = activeCount;
+            if (countEl) countEl.textContent = String(activeCount);
         });
     });
 }
@@ -550,15 +550,32 @@ function shareSession() {
 }
 
 function copyToClipboard(text) {
+    // Use modern clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            showNotification('URL copiée dans le presse-papier !', 'success');
+        }).catch(() => {
+            // Fallback to old method
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
     // Create temporary input
     const input = document.createElement('input');
     input.value = text;
     document.body.appendChild(input);
     input.select();
-    document.execCommand('copy');
+    try {
+        document.execCommand('copy');
+        showNotification('URL copiée dans le presse-papier !', 'success');
+    } catch (err) {
+        showNotification('Erreur lors de la copie', 'warning');
+    }
     document.body.removeChild(input);
-
-    showNotification('URL copiée dans le presse-papier !', 'success');
 }
 
 function showNotification(message, type = 'info') {
