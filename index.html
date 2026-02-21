@@ -1,214 +1,243 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agile Poker Planning</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agile Poker Planning</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Feuille de style principale -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="container">
-    <h1>🎯 Agile Poker Planning</h1>
-    <p class="subtitle">
-        Planning Poker en temps réel - Choisissez votre rôle
-    </p>
 
-    <!-- Choix du rôle -->
-    <div id="roleChoice">
-        <div class="role-buttons">
-            <button class="role-btn facilitator" onclick="showFacilitatorForm()">
-                🎬 Je suis le facilitateur
-            </button>
-            <button class="role-btn participant" onclick="showParticipantForm()">
-                👥 Je suis un participant
-            </button>
+  <!-- ═══════════════════════════════════════════════
+       EN-TÊTE GLOBAL (masqué jusqu'à entrée en salle)
+  ═══════════════════════════════════════════════════ -->
+  <header class="app-header" id="app-header" style="display:none">
+    <div class="logo">POKER<span>PLANNING</span></div>
+    <div class="header-meta" id="header-meta"></div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════
+       CONTENEUR PRINCIPAL DE L'APPLICATION
+  ═══════════════════════════════════════════════════ -->
+  <div id="app">
+
+    <!-- ── ÉCRAN D'ACCUEIL ── -->
+    <div id="screen-home" class="screen active">
+      <div class="container">
+
+        <!-- Hero -->
+        <div class="hero">
+          <div class="card-suits">♠ ♣ ♥ ♦</div>
+          <div class="hero-logo">POKER<br>PLANNING</div>
+          <div class="hero-sub">Estimation collaborative Agile · Méthode Scrum</div>
         </div>
-    </div>
 
-    <!-- Formulaire Facilitateur -->
-    <div id="facilitatorForm" class="hidden">
-        <div class="form-box">
-            <button class="back-link" onclick="showRoleChoice()">← Retour</button>
-            <h2>🎬 Facilitateur</h2>
-            <p class="form-description">Créez une nouvelle session et invitez votre équipe</p>
+        <!-- Créer une session -->
+        <div class="panel">
+          <div class="panel-title">◆ Créer une session</div>
+          <div class="form-group">
+            <label for="create-name">Votre nom (facilitateur)</label>
+            <input type="text" id="create-name" placeholder="Ex: Alice Martin" maxlength="30">
+            <div class="error-msg" id="err-create-name">Veuillez saisir votre nom.</div>
+          </div>
+          <div class="form-group">
+            <label for="create-item">Item à estimer (optionnel)</label>
+            <input type="text" id="create-item" placeholder="Ex: US-42 — Connexion OAuth" maxlength="120">
+          </div>
+          <button class="btn btn-primary btn-full" id="btn-create-session">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Créer la session
+          </button>
+        </div>
 
-            <label for="facilitatorName"></label><input
-                    type="text"
-                    id="facilitatorName"
-                    placeholder="Votre nom (ex: Claude)"
-                    maxlength="20"
-                    autocomplete="off"
-            >
+        <div class="divider">OU</div>
 
-            <button class="btn btn-primary" onclick="createSession()">
-                ➕ Créer une nouvelle session
-            </button>
+        <!-- Rejoindre une session -->
+        <div class="panel">
+          <div class="panel-title">◆ Rejoindre une session</div>
+          <div class="form-group">
+            <label for="join-code">Code de session</label>
+            <input type="text" id="join-code" placeholder="Ex: A3F7" maxlength="6" style="text-transform:uppercase">
+            <div class="error-msg" id="err-join-code"></div>
+          </div>
+          <div class="form-group">
+            <label for="join-name">Votre nom</label>
+            <input type="text" id="join-name" placeholder="Ex: Bob Dupont" maxlength="30">
+            <div class="error-msg" id="err-join-name">Veuillez saisir votre nom.</div>
+          </div>
+          <button class="btn btn-secondary btn-full" id="btn-join-session">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Rejoindre
+          </button>
+        </div>
 
-            <div class="divider">
-                <span>OU</span>
-            </div>
+      </div>
+    </div><!-- /screen-home -->
 
-            <div class="join-existing">
-                <p class="hint">Si vous avez déjà une session en cours :</p>
-                <label for="facilitatorSessionCode"></label><input
-                        type="text"
-                        id="facilitatorSessionCode"
-                        placeholder="Code de session (ex: equipe37)"
-                        maxlength="20"
-                        autocomplete="off"
-                        class="session-code-input"
-                >
-                <button class="btn btn-secondary" onclick="joinAsRole('facilitator')">
-                    Rejoindre ma session
+    <!-- ── SALLE DE VOTE ── -->
+    <div id="screen-room" class="screen">
+      <div class="vote-room">
+
+        <!-- Colonne principale -->
+        <div class="vote-stage">
+
+          <!-- Item en cours -->
+          <div class="story-panel">
+            <div class="story-label">Item en cours d'estimation</div>
+            <div class="story-text placeholder" id="story-display">En attente du facilitateur…</div>
+          </div>
+
+          <!-- Barre de statut -->
+          <div class="status-bar">
+            <div class="status-dot" id="status-dot"></div>
+            <div class="status-text" id="status-text">En attente</div>
+            <div id="my-vote-indicator"></div>
+          </div>
+
+          <!-- Contrôles facilitateur -->
+          <div id="facilitator-controls" style="display:none">
+            <div class="panel">
+              <div class="panel-title">◆ Contrôles facilitateur</div>
+              <div class="item-input-row form-group" style="margin-bottom:0">
+                <input type="text" id="item-input" placeholder="Saisir l'item à estimer…" maxlength="120">
+                <button class="btn btn-secondary" id="btn-update-item" title="Mettre à jour l'item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 1 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
                 </button>
+              </div>
             </div>
+            <div class="actions-panel" style="margin-top:12px">
+              <button class="btn btn-primary" id="btn-launch">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Lancer le vote
+              </button>
+              <button class="btn btn-success" id="btn-reveal" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Révéler
+              </button>
+              <button class="btn btn-secondary" id="btn-newround" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                Nouveau tour
+              </button>
+              <button class="btn btn-danger btn-sm" id="btn-close-session">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Clôturer
+              </button>
+            </div>
+          </div><!-- /facilitator-controls -->
+
+          <!-- Contrôles participant -->
+          <div id="participant-controls">
+            <div class="cards-title">CHOISISSEZ VOTRE CARTE</div>
+            <div class="cards-grid" id="cards-grid"></div>
+            <div class="waiting-hint" id="waiting-hint" style="display:none; margin-top:14px">
+              <div class="spinner"></div>
+              <span>En attente de la révélation par le facilitateur…</span>
+            </div>
+            <div style="margin-top:14px">
+              <button class="btn btn-danger btn-sm" id="btn-leave">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Quitter la session
+              </button>
+            </div>
+          </div><!-- /participant-controls -->
+
+          <!-- Résultats -->
+          <div id="results-panel" style="display:none" class="results-panel">
+            <div class="results-title">◆ RÉSULTATS DU VOTE</div>
+            <div id="consensus-banner" class="consensus-banner" style="display:none"></div>
+            <div class="stats-grid" id="stats-grid"></div>
+            <div class="revealed-votes" id="revealed-votes"></div>
+          </div>
+
+          <!-- Lien d'invitation (facilitateur uniquement) -->
+          <div id="session-link-panel" class="panel" style="display:none">
+            <div class="panel-title">◆ Lien d'invitation</div>
+            <div class="copy-link-wrap">
+              <input type="text" id="session-link-input" readonly>
+              <button class="btn btn-secondary" id="btn-copy-link">Copier</button>
+            </div>
+          </div>
+
+        </div><!-- /vote-stage -->
+
+        <!-- Barre latérale participants -->
+        <div class="sidebar">
+          <div class="participants-panel">
+            <div class="participants-title">
+              <span>PARTICIPANTS</span>
+              <span class="participants-count" id="participants-count">0 / 8</span>
+            </div>
+            <div id="participants-list">
+              <div class="empty-state">Aucun participant…</div>
+            </div>
+          </div>
         </div>
+
+      </div>
+    </div><!-- /screen-room -->
+
+  </div><!-- /app -->
+
+  <!-- ═══════════════════════════════════════════════
+       COMPOSANTS GLOBAUX (toasts, modals)
+  ═══════════════════════════════════════════════════ -->
+
+  <!-- Toast copie lien -->
+  <div class="copy-toast" id="copy-toast">Lien copié !</div>
+
+  <!-- Notification flottante -->
+  <div class="notification" id="notification"></div>
+
+  <!-- Modal de confirmation clôture -->
+  <div class="overlay" id="modal-close">
+    <div class="modal">
+      <div class="modal-title">Clôturer la session ?</div>
+      <p style="color:var(--text-muted); font-size:.85rem; line-height:1.6">
+        Cette action supprimera toutes les données et déconnectera les participants. Elle est irréversible.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-modal-cancel">Annuler</button>
+        <button class="btn btn-danger" id="btn-modal-confirm">Clôturer</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Formulaire Participant -->
-    <div id="participantForm" class="hidden">
-        <div class="form-box">
-            <button class="back-link" onclick="showRoleChoice()">← Retour</button>
-            <h2>👥 Participant</h2>
-            <p class="form-description">Rejoignez une session existante</p>
+  <!-- ═══════════════════════════════════════════════
+       MODULES JAVASCRIPT (ordre de chargement)
+  ═══════════════════════════════════════════════════ -->
+  <script type="module" src="js/app.js"></script>
 
-            <label for="participantName"></label><input
-                    type="text"
-                    id="participantName"
-                    placeholder="Votre nom (ex: Alice)"
-                    maxlength="20"
-                    autocomplete="off"
-            >
-
-            <label for="participantSessionCode"></label><input
-                    type="text"
-                    id="participantSessionCode"
-                    placeholder="Code de session (ex: equipe37)"
-                    maxlength="20"
-                    autocomplete="off"
-                    class="session-code-input"
-            >
-
-            <button class="btn btn-primary" onclick="joinAsRole('participant')">
-                Rejoindre la session
-            </button>
-
-            <p class="hint">💡 Le facilitateur vous a partagé le code de session</p>
-        </div>
-    </div>
-</div>
-
-<!-- Gun.js -->
-<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-<script>
-    // Vérifier si une session existe dans l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const existingSessionId = urlParams.get('session');
-    const roleFromUrl = urlParams.get('role');
-
-    if (existingSessionId) {
-        // Si URL avec session, proposer directement de rejoindre
-        if (roleFromUrl === 'facilitator') {
-            showFacilitatorForm();
-            document.getElementById('facilitatorSessionCode').value = existingSessionId;
-        } else {
-            showParticipantForm();
-            document.getElementById('participantSessionCode').value = existingSessionId;
-        }
-    }
-
-    function showRoleChoice() {
-        document.getElementById('roleChoice').classList.remove('hidden');
-        document.getElementById('facilitatorForm').classList.add('hidden');
-        document.getElementById('participantForm').classList.add('hidden');
-    }
-
-    function showFacilitatorForm() {
-        document.getElementById('roleChoice').classList.add('hidden');
-        document.getElementById('facilitatorForm').classList.remove('hidden');
-        document.getElementById('participantForm').classList.add('hidden');
-        document.getElementById('facilitatorName').focus();
-    }
-
-    function showParticipantForm() {
-        document.getElementById('roleChoice').classList.add('hidden');
-        document.getElementById('facilitatorForm').classList.add('hidden');
-        document.getElementById('participantForm').classList.remove('hidden');
-        document.getElementById('participantName').focus();
-    }
-
-    function createSession() {
-        const nameInput = document.getElementById('facilitatorName');
-        const playerName = nameInput.value.trim();
-
-        if (!playerName) {
-            nameInput.classList.add('error-shake');
-            setTimeout(() => nameInput.classList.remove('error-shake'), 500);
-            return;
-        }
-
-        // Générer un nouveau code de session
-        const sessionId = generateSessionId();
-
-        // Stocker le nom et le rôle
-        localStorage.setItem('playerName', playerName);
-        localStorage.setItem('playerRole', 'facilitator');
-
-        // Rediriger vers la session
-        window.location.href = `poker.html?session=${sessionId}&role=facilitator`;
-    }
-
-    function joinAsRole(role) {
-        const nameInput = document.getElementById(role === 'facilitator' ? 'facilitatorName' : 'participantName');
-        const sessionInput = document.getElementById(role === 'facilitator' ? 'facilitatorSessionCode' : 'participantSessionCode');
-
-        const playerName = nameInput.value.trim();
-        const sessionCode = sessionInput.value.trim().toLowerCase();
-
-        if (!playerName) {
-            nameInput.classList.add('error-shake');
-            setTimeout(() => nameInput.classList.remove('error-shake'), 500);
-            return;
-        }
-
-        if (!sessionCode) {
-            sessionInput.classList.add('error-shake');
-            setTimeout(() => sessionInput.classList.remove('error-shake'), 500);
-            return;
-        }
-
-        // Stocker le nom et le rôle
-        localStorage.setItem('playerName', playerName);
-        localStorage.setItem('playerRole', role);
-
-        // Rediriger vers la session
-        window.location.href = `poker.html?session=${sessionCode}&role=${role}`;
-    }
-
-    function generateSessionId() {
-        const adjectives = ['agile', 'rapide', 'super', 'mega', 'ultra', 'top'];
-        const numbers = Math.floor(Math.random() * 100);
-        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-        return adj + numbers;
-    }
-
-    // Permettre Enter pour valider
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            if (!document.getElementById('facilitatorForm').classList.contains('hidden')) {
-                const sessionCode = document.getElementById('facilitatorSessionCode').value.trim();
-                if (sessionCode) {
-                    joinAsRole('facilitator');
-                } else {
-                    createSession();
-                }
-            } else if (!document.getElementById('participantForm').classList.contains('hidden')) {
-                joinAsRole('participant');
-            }
-        }
-    });
-</script>
 </body>
-
 </html>

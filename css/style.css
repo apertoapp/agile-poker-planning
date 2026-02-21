@@ -1,0 +1,858 @@
+/* ═══════════════════════════════════════════════════════════════════
+   style.css — Agile Poker Planning
+   Structure : Variables → Reset → Layout → Composants → Écrans → Responsive
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. VARIABLES GLOBALES ─────────────────────────────────────────── */
+:root {
+  --bg-deep:    #0d1117;
+  --bg-card:    #161b22;
+  --bg-hover:   #1f2937;
+  --border:     #30363d;
+  --gold:       #f0a500;
+  --gold-dim:   #7a5200;
+  --green:      #2ea043;
+  --red:        #cf2222;
+  --text:       #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim:   #484f58;
+  --radius:     10px;
+  --shadow:     0 8px 32px rgba(0, 0, 0, .6);
+}
+
+/* ── 2. RESET & BASE ───────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grille de fond décorative */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(240, 165, 0, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 165, 0, .04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ── 3. LAYOUT PRINCIPAL ──────────────────────────────────────────── */
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.container.wide {
+  max-width: 1100px;
+}
+
+/* ── 4. EN-TÊTE ───────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(13, 17, 23, .8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(240, 165, 0, .4);
+}
+
+.logo span {
+  color: var(--text-muted);
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.header-meta {
+  font-size: .75rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.header-meta strong {
+  color: var(--gold);
+}
+
+/* Badges de rôle */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.badge-facilitator {
+  background: rgba(240, 165, 0, .15);
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+}
+
+.badge-participant {
+  background: rgba(46, 160, 67, .15);
+  color: #3fb950;
+  border: 1px solid #2ea043;
+}
+
+/* ── 5. GESTION DES ÉCRANS ────────────────────────────────────────── */
+.screen {
+  display: none;
+  animation: fadeIn .4s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 6. PANNEAUX & CARTES UI ─────────────────────────────────────── */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow);
+}
+
+.panel + .panel {
+  margin-top: 20px;
+}
+
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+/* ── 7. FORMULAIRES ──────────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: .7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .9rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+input[type="text"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240, 165, 0, .15);
+}
+
+input[type="text"]::placeholder {
+  color: var(--text-dim);
+}
+
+.error-msg {
+  color: var(--red);
+  font-size: .75rem;
+  margin-top: 6px;
+  display: none;
+}
+
+.error-msg.show {
+  display: block;
+}
+
+/* ── 8. BOUTONS ──────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: .8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+  outline: none;
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: #0d1117;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #ffc233;
+  box-shadow: 0 4px 20px rgba(240, 165, 0, .4);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid rgba(207, 34, 34, .4);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(207, 34, 34, .1);
+  border-color: var(--red);
+}
+
+.btn-success {
+  background: var(--green);
+  color: #fff;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #3fb950;
+  box-shadow: 0 4px 20px rgba(46, 160, 67, .35);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: .7rem;
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── 9. SÉPARATEUR ───────────────────────────────────────────────── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: var(--text-dim);
+  font-size: .75rem;
+  letter-spacing: 2px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── 10. ÉCRAN D'ACCUEIL ─────────────────────────────────────────── */
+#screen-home .hero {
+  text-align: center;
+  padding: 60px 0 40px;
+}
+
+.hero-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  letter-spacing: 8px;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(240, 165, 0, .3);
+  line-height: 1;
+}
+
+.hero-sub {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+.card-suits {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  font-size: 2rem;
+  margin: 18px 0;
+  color: var(--gold);
+  opacity: .3;
+  letter-spacing: 4px;
+}
+
+/* ── 11. SALLE DE VOTE ───────────────────────────────────────────── */
+.vote-room {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 20px;
+  padding: 28px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.vote-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Item en cours */
+.story-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 28px;
+}
+
+.story-label {
+  font-size: .65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.story-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.3rem;
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 36px;
+}
+
+.story-text.placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* Barre de statut */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  font-size: .75rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.waiting  { background: var(--text-dim); }
+.status-dot.voting   { background: var(--gold); box-shadow: 0 0 8px var(--gold); animation: pulse 1.4s infinite; }
+.status-dot.revealed { background: var(--green); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
+.status-text {
+  flex: 1;
+  color: var(--text-muted);
+}
+
+/* Zone d'actions facilitateur */
+.actions-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions-panel .btn {
+  flex: 1;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.item-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.item-input-row input {
+  flex: 1;
+}
+
+/* ── 12. CARTES DE VOTE ──────────────────────────────────────────── */
+.cards-title {
+  font-size: .65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.vote-card {
+  width: 68px;
+  height: 96px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--text-muted);
+  transition: all .2s;
+  position: relative;
+  user-select: none;
+}
+
+.vote-card:hover:not(.disabled):not(.selected) {
+  border-color: var(--gold-dim);
+  color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .5);
+}
+
+.vote-card.selected {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(240, 165, 0, .1);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(240, 165, 0, .3);
+}
+
+.vote-card.disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+/* ── 13. RÉSULTATS ───────────────────────────────────────────────── */
+.results-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  animation: slideIn .4s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.results-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  letter-spacing: 2px;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: .6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.consensus-banner {
+  background: linear-gradient(135deg, rgba(46, 160, 67, .15), rgba(46, 160, 67, .05));
+  border: 1px solid #2ea043;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  color: #3fb950;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.revealed-votes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.revealed-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.revealed-card-val {
+  width: 52px;
+  height: 72px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  color: var(--text);
+  animation: flipCard .5s ease both;
+}
+
+.revealed-card-val.high { border-color: var(--red);  color: var(--red);  }
+.revealed-card-val.low  { border-color: #3fb950;     color: #3fb950;     }
+.revealed-card-val.mid  { border-color: var(--gold); color: var(--gold); }
+
+@keyframes flipCard {
+  from { transform: rotateY(90deg) scale(.8); opacity: 0; }
+  to   { transform: rotateY(0)     scale(1);  opacity: 1; }
+}
+
+.revealed-card-name {
+  font-size: .6rem;
+  color: var(--text-muted);
+  max-width: 60px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 14. BARRE LATÉRALE PARTICIPANTS ─────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.participants-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.participants-title {
+  font-size: .65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.participants-count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  color: var(--gold);
+}
+
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .8rem;
+}
+
+.participant-item:last-child {
+  border-bottom: none;
+}
+
+.participant-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #2a3a4a, #1a2a3a);
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+}
+
+.participant-name {
+  flex: 1;
+  color: var(--text);
+}
+
+.participant-role {
+  font-size: .6rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.vote-status {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.vote-status.not-voted { background: var(--bg-deep); color: var(--text-dim); }
+.vote-status.voted     { background: rgba(240, 165, 0, .15); color: var(--gold); border-color: var(--gold-dim); }
+.vote-status.revealed  { background: rgba(46, 160, 67, .15); color: #3fb950; border-color: #2ea043; font-size: .85rem; }
+
+/* ── 15. LIEN D'INVITATION ───────────────────────────────────────── */
+.copy-link-wrap {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.copy-link-wrap input {
+  flex: 1;
+  font-size: .75rem;
+  color: var(--gold);
+}
+
+/* ── 16. TOASTS & NOTIFICATIONS ──────────────────────────────────── */
+.copy-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: #0d1117;
+  padding: 10px 22px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: .8rem;
+  letter-spacing: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  z-index: 999;
+}
+
+.copy-toast.show {
+  opacity: 1;
+}
+
+.notification {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: .8rem;
+  color: var(--text);
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all .3s;
+  z-index: 500;
+  max-width: 280px;
+  pointer-events: none;
+}
+
+.notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── 17. MODAL ───────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .7);
+  display: none;
+  place-items: center;
+  z-index: 300;
+  padding: 20px;
+}
+
+.overlay.show {
+  display: grid;
+  animation: fadeIn .2s ease;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .8);
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  justify-content: flex-end;
+}
+
+/* ── 18. COMPOSANTS DIVERS ───────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-dim);
+  font-size: .8rem;
+  font-style: italic;
+}
+
+.waiting-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--bg-deep);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 19. RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .vote-room {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    order: -1; /* Participants en haut sur mobile */
+  }
+}
+
+@media (max-width: 600px) {
+  .app-header   { padding: 14px 16px; }
+  .vote-room    { padding: 16px; }
+  .vote-card    { width: 56px; height: 80px; font-size: 1.5rem; }
+  .panel        { padding: 20px; }
+  .hero-logo    { font-size: 3rem; }
+}
