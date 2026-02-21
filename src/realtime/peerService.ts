@@ -1,19 +1,37 @@
-let peer: any = null
-let connections: any[] = []
+let peer:any = null
+let connections:any[] = []
 
-export const createHost = (sessionId: string, onMessage: any) => {
+export const createHost = (
+  sessionId:string,
+  onMessage:any,
+  getSession:any
+) => {
 
   peer = new (window as any).Peer(sessionId)
 
-  peer.on("connection", (conn: any) => {
+  peer.on("connection", (conn:any) => {
 
     connections.push(conn)
+
+    conn.on("open", () => {
+
+      // ✅ ENVOI SESSION INITIALE AU PARTICIPANT
+      const session = getSession()
+
+      conn.send({
+        type: "session-update",
+        session
+      })
+    })
 
     conn.on("data", onMessage)
   })
 }
 
-export const joinHost = (sessionId: string, onMessage: any) => {
+export const joinHost = (
+  sessionId:string,
+  onMessage:any
+) => {
 
   peer = new (window as any).Peer()
 
@@ -26,7 +44,7 @@ export const joinHost = (sessionId: string, onMessage: any) => {
   conn.on("data", onMessage)
 }
 
-export const broadcast = (msg: any) => {
+export const broadcast = (msg:any) => {
 
   connections.forEach(c => {
 
