@@ -1,8 +1,8 @@
 /**
  * config.js — Constantes et structure de données
  *
- * Centralise toutes les valeurs fixes de l'application :
- * suite Fibonacci, limites métier, clés de stockage, types de messages.
+ * MSG (BroadcastChannel) supprimé — remplacé par WebRTC (webrtc.js).
+ * Les types de messages sont désormais des chaînes littérales dans webrtc.js.
  */
 
 'use strict';
@@ -17,13 +17,6 @@ export const MAX_PARTICIPANTS = 8;
 
 /* ── Statuts de session (CDC §4.3) ──────────────────────────────────── */
 
-/**
- * @typedef {'waiting'|'voting'|'revealed'} SessionStatus
- *
- * - waiting  : session créée, vote pas encore lancé
- * - voting   : vote en cours, cartes masquées
- * - revealed : votes révélés, statistiques affichées
- */
 export const STATUS = {
   WAITING:  'waiting',
   VOTING:   'voting',
@@ -32,7 +25,6 @@ export const STATUS = {
 
 /* ── Rôles utilisateur (CDC §3) ─────────────────────────────────────── */
 
-/** @typedef {'facilitator'|'participant'} UserRole */
 export const ROLE = {
   FACILITATOR: 'facilitator',
   PARTICIPANT:  'participant',
@@ -40,64 +32,37 @@ export const ROLE = {
 
 /* ── Clés de persistance (CDC §7) ───────────────────────────────────── */
 
-/** Préfixe localStorage pour les données de session */
+/** Préfixe localStorage — conservé pour la restauration du facilitateur après F5 */
 export const LS_SESSION_PREFIX = 'pps_session_';
 
 /** Clé sessionStorage pour l'identité de l'utilisateur courant */
 export const SS_ME_KEY = 'pps_me';
 
-/* ── Types de messages BroadcastChannel (CDC §2) ────────────────────── */
+/* ── Codes d'erreur métier ───────────────────────────────────────────── */
 
-/**
- * Énumération des types de messages échangés via BroadcastChannel.
- * Chaque message inclut toujours : { type, from: myId, ...payload }
- */
-export const MSG = {
-  /** Un participant demande à rejoindre (payload: { pid, name }) */
-  PARTICIPANT_JOIN:  'participant_join',
-
-  /** Synchronisation complète de l'état (payload: { state }) */
-  STATE_SYNC:        'state_sync',
-
-  /** Un participant a voté (payload: { vote }) */
-  VOTE_CAST:         'vote_cast',
-
-  /** Un participant quitte la session */
-  PARTICIPANT_LEAVE: 'participant_leave',
-
-  /** Le facilitateur clôture la session */
-  SESSION_CLOSED:    'session_closed',
-
-  /** Erreur adressée à un onglet spécifique (payload: { to, code }) */
-  ERROR:             'error',
-
-  /** Un participant demande l'état courant au facilitateur */
-  REQUEST_STATE:     'request_state',
-};
-
-/** Codes d'erreur métier */
 export const ERR = {
   SESSION_FULL:      'SESSION_FULL',
   SESSION_NOT_FOUND: 'SESSION_NOT_FOUND',
 };
 
-/* ── Structure de données de session ────────────────────────────────── */
+/* ── Typedefs JSDoc ──────────────────────────────────────────────────── */
 
 /**
+ * @typedef {'waiting'|'voting'|'revealed'} SessionStatus
+ * @typedef {'facilitator'|'participant'}   UserRole
+ *
  * @typedef {Object} Participant
- * @property {string}       id            - Identifiant unique de l'onglet
- * @property {string}       name          - Nom saisi par l'utilisateur
- * @property {number|null}  vote          - Valeur votée, null si pas encore voté
- * @property {boolean}      isFacilitator - true pour le facilitateur
- */
-
-/**
+ * @property {string}      id
+ * @property {string}      name
+ * @property {number|null} vote
+ * @property {boolean}     isFacilitator
+ *
  * @typedef {Object} Session
- * @property {string}          id              - Code de session (4 caractères)
- * @property {string}          facilitatorId   - myId du facilitateur
- * @property {string}          facilitatorName - Nom du facilitateur
- * @property {SessionStatus}   status          - Statut courant
- * @property {string}          currentItem     - Intitulé de l'item à estimer
- * @property {Participant[]}   participants    - Liste des participants
- * @property {number}          createdAt       - Timestamp de création
+ * @property {string}        id
+ * @property {string}        facilitatorId
+ * @property {string}        facilitatorName
+ * @property {SessionStatus} status
+ * @property {string}        currentItem
+ * @property {Participant[]} participants
+ * @property {number}        createdAt
  */

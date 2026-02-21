@@ -1,37 +1,41 @@
 /**
  * session.js — Cycle de vie des sessions (CDC §5)
  *
- * Gère : création, rejoindre, quitter, clôture.
- * Ce module est le seul à modifier l'état global de session.
+ * Logique métier pure. Transport délégué à webrtc.js.
  *
- * Règles métier implémentées :
- *  - 1 facilitateur par session (CDC §3.1)
- *  - Max 8 participants (CDC §3.2)
- *  - Nom obligatoire (CDC §3.2)
- *  - URL de session générée (CDC §5.1)
- *  - Messages d'erreur "Session complète" / "Session introuvable" (CDC §5.2)
- *  - Clôture réservée au facilitateur (CDC §5.3)
+ * Différence clé vs. version BroadcastChannel :
+ *   ✗ loadSession() pour vérifier l'existence (localStorage = même navigateur)
+ *   ✓ joinAsParticipant() tente une connexion WebRTC P2P
+ *      → 'peer-unavailable' si le code est invalide (cross-navigateur)
+ *
+ *   createSession() et joinSession() sont async (handshake WebRTC).
+ *   Les actions en salle (launchVote, castVote…) restent synchrones
+ *   car l'envoi sur un DataChannel ouvert est immédiat.
  */
 
 'use strict';
 
-import { STATUS, ROLE, MAX_PARTICIPANTS, MSG } from './config.js';
+import { STATUS, ROLE, MAX_PARTICIPANTS } from './config.js';
 import { saveSession, loadSession, deleteSession, saveMe, clearMe } from './storage.js';
-import { openChannel, closeChannel, broadcast, broadcastState } from './channel.js';
+import {
+  initWebRTC,
+  createFacilitatorPeer, joinAsParticipant,
+  broadcastState, sendToFacilitator,
+  broadcastClose, disconnectWebRTC,
+} from './webrtc.js';
 
 /* ══════════════════════════════════════════════════
    ÉTAT GLOBAL (singleton)
-   Exporté en lecture pour les autres modules.
    ══════════════════════════════════════════════════ */
 
 export const state = {
-  myId:      null,   // Identifiant unique de cet onglet
+  myId:      null,
   myName:    '',
-  myRole:    '',     // ROLE.FACILITATOR | ROLE.PARTICIPANT
+  myRole:    '',
   sessionId: null,
-  session:   null,   // Objet Session complet (cf. config.js)
+  session:   null,
 
-  /* Callbacks injectés par app.js */
+  // Callbacks UI — injectés par app.js, utilisés par webrtc.js
   onParticipantJoin:  null,
   onParticipantLeave: null,
   onSessionClosed:    null,
@@ -39,14 +43,9 @@ export const state = {
 };
 
 /* ══════════════════════════════════════════════════
-   GÉNÉRATEURS D'IDENTIFIANTS
+   GÉNÉRATEURS
    ══════════════════════════════════════════════════ */
 
-/**
- * Génère un code de session alphanumérique sans ambiguïté (CDC §5.1).
- * @param {number} len - Longueur du code (défaut : 4)
- * @returns {string}
- */
 function _genSessionId(len = 4) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   return Array.from(
@@ -55,10 +54,6 @@ function _genSessionId(len = 4) {
   ).join('');
 }
 
-/**
- * Génère un identifiant unique par onglet (non lisible, usage interne).
- * @returns {string}
- */
 function _genParticipantId() {
   return Math.random().toString(36).slice(2, 10);
 }
@@ -67,37 +62,22 @@ function _genParticipantId() {
    URL DE SESSION (CDC §5.1)
    ══════════════════════════════════════════════════ */
 
-/**
- * Lit le code de session depuis les paramètres d'URL.
- * @returns {string|null}
- */
 export function getUrlSessionId() {
   return new URLSearchParams(window.location.search).get('session');
 }
 
-/**
- * Met à jour l'URL pour refléter la session courante.
- * @param {string} id
- */
 export function setUrlSessionId(id) {
   const url = new URL(window.location.href);
   url.searchParams.set('session', id);
   history.replaceState({}, '', url.toString());
 }
 
-/**
- * Supprime le paramètre session de l'URL.
- */
 export function clearUrlSessionId() {
   const url = new URL(window.location.href);
   url.searchParams.delete('session');
   history.replaceState({}, '', url.toString());
 }
 
-/**
- * Construit l'URL d'invitation complète.
- * @returns {string} Ex: https://user.github.io/agile-poker-planning/?session=A3F7
- */
 export function buildInviteUrl() {
   const url = new URL(window.location.href);
   url.searchParams.set('session', state.sessionId);
@@ -109,43 +89,53 @@ export function buildInviteUrl() {
    ══════════════════════════════════════════════════ */
 
 /**
- * Crée une nouvelle session.
- * Le créateur devient automatiquement facilitateur.
+ * Crée une session et en devient le facilitateur.
+ * Génère un nouveau code si le Peer ID est déjà pris (collision rare).
  *
- * @param {string} name       - Nom du facilitateur
- * @param {string} [item='']  - Premier item à estimer (optionnel)
- * @param {Function} onReady  - Callback appelé quand la session est prête
- * @param {Function} onRender - Callback de re-rendu
- * @returns {boolean} false si les données sont invalides
+ * @param {string}   name
+ * @param {string}   item
+ * @param {Function} onReady
+ * @param {Function} onRender
+ * @returns {Promise<boolean>}
  */
-export function createSession(name, item = '', onReady, onRender) {
+export async function createSession(name, item = '', onReady, onRender) {
   if (!name) return false;
+
+  initWebRTC(state, onRender);
+
+  // Tenter jusqu'à 5 codes différents en cas de collision
+  let sessionId;
+  for (let i = 0; i < 5; i++) {
+    sessionId = _genSessionId(4);
+    try {
+      await createFacilitatorPeer(sessionId);
+      break; // succès
+    } catch (e) {
+      if (e.code === 'ID_TAKEN' && i < 4) continue;
+      console.error('[session] createFacilitatorPeer:', e);
+      return false;
+    }
+  }
 
   state.myId      = _genParticipantId();
   state.myName    = name;
   state.myRole    = ROLE.FACILITATOR;
-  state.sessionId = _genSessionId(4);
+  state.sessionId = sessionId;
 
   state.session = {
-    id:              state.sessionId,
+    id:              sessionId,
     facilitatorId:   state.myId,
     facilitatorName: name,
     status:          STATUS.WAITING,
     currentItem:     item,
-    participants: [{
-      id:            state.myId,
-      name,
-      vote:          null,
-      isFacilitator: true,
-    }],
-    createdAt: Date.now(),
+    participants:    [{ id: state.myId, name, vote: null, isFacilitator: true }],
+    createdAt:       Date.now(),
   };
 
   saveSession(state.session);
-  saveMe({ myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId: state.sessionId });
-  setUrlSessionId(state.sessionId);
-  openChannel(state.sessionId, state, onRender);
-  onReady && onReady();
+  saveMe({ myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId });
+  setUrlSessionId(sessionId);
+  onReady?.();
   return true;
 }
 
@@ -154,158 +144,187 @@ export function createSession(name, item = '', onReady, onRender) {
    ══════════════════════════════════════════════════ */
 
 /**
- * @typedef {Object} JoinResult
- * @property {boolean} success
- * @property {string}  [error]  - 'SESSION_NOT_FOUND' | 'SESSION_FULL' | 'NAME_REQUIRED' | 'CODE_REQUIRED'
- */
-
-/**
- * Rejoint une session existante en tant que participant.
+ * Rejoint une session en tant que participant via WebRTC.
  *
- * @param {string}   code      - Code de session saisi
- * @param {string}   name      - Nom du participant
- * @param {Function} onReady   - Callback quand la salle est prête
- * @param {Function} onRender  - Callback de re-rendu
- * @returns {JoinResult}
+ * Flux :
+ *  1. Créer un Peer aléatoire
+ *  2. Connexion au Peer facilitateur (ID = 'pps-CODE')
+ *     → 'peer-unavailable' si le code est invalide
+ *  3. Envoi de participant_join
+ *  4. Réception de state_sync → Promise résolue → salle prête
+ *
+ * @param {string}   code
+ * @param {string}   name
+ * @param {Function} onReady
+ * @param {Function} onRender
+ * @returns {Promise<{success:boolean, error?:string}>}
  */
-export function joinSession(code, name, onReady, onRender) {
-  if (!name)         return { success: false, error: 'NAME_REQUIRED' };
-  if (!code)         return { success: false, error: 'CODE_REQUIRED' };
+export async function joinSession(code, name, onReady, onRender) {
+  if (!name) return { success: false, error: 'NAME_REQUIRED' };
+  if (!code) return { success: false, error: 'CODE_REQUIRED' };
 
-  const existing = loadSession(code);
-  if (!existing)     return { success: false, error: 'SESSION_NOT_FOUND' };
+  state.myId   = _genParticipantId();
+  state.myName = name;
+  state.myRole = ROLE.PARTICIPANT;
 
-  const nonFac = existing.participants.filter(p => !p.isFacilitator);
-  if (nonFac.length >= MAX_PARTICIPANTS) {
-    return { success: false, error: 'SESSION_FULL' };
+  initWebRTC(state, onRender);
+
+  try {
+    await joinAsParticipant(code);
+    // state.session a été rempli par webrtc.js lors du premier state_sync
+  } catch (e) {
+    disconnectWebRTC();
+    const error = e.code === 'SESSION_NOT_FOUND' ? 'SESSION_NOT_FOUND'
+                : e.code === 'SESSION_FULL'      ? 'SESSION_FULL'
+                :                                  'PEER_ERROR';
+    return { success: false, error };
   }
 
-  state.myId      = _genParticipantId();
-  state.myName    = name;
-  state.myRole    = ROLE.PARTICIPANT;
   state.sessionId = code;
-  state.session   = existing;
-
-  // Ajouter le participant localement avant la synchro
-  state.session.participants.push({
-    id:            state.myId,
-    name,
-    vote:          null,
-    isFacilitator: false,
-  });
-
-  saveSession(state.session);
-  saveMe({ myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId: state.sessionId });
-  setUrlSessionId(state.sessionId);
-  openChannel(state.sessionId, state, onRender);
-
-  // Notifier le facilitateur et demander l'état le plus récent
-  broadcast(MSG.PARTICIPANT_JOIN, { pid: state.myId, name });
-  broadcast(MSG.REQUEST_STATE);
-
-  onReady && onReady();
+  saveMe({ myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId: code });
+  setUrlSessionId(code);
+  onReady?.();
   return { success: true };
 }
 
 /* ══════════════════════════════════════════════════
-   ACTIONS FACILITATEUR (CDC §3.1)
+   RESTAURATION APRÈS RECHARGEMENT
    ══════════════════════════════════════════════════ */
 
 /**
- * Met à jour l'intitulé de l'item en cours.
- * @param {string} item
+ * Restaure la session après un F5.
+ *
+ * Facilitateur : recrée le Peer avec le même ID + restaure depuis localStorage.
+ * Participant  : reconnecte au facilitateur via WebRTC.
+ *
+ * @param {object}   me       - { myId, myName, myRole, sessionId }
+ * @param {Function} onReady
+ * @param {Function} onRender
+ * @returns {Promise<boolean>}
  */
+export async function restoreSession(me, onReady, onRender) {
+  initWebRTC(state, onRender);
+
+  state.myId      = me.myId;
+  state.myName    = me.myName;
+  state.myRole    = me.myRole;
+  state.sessionId = me.sessionId;
+
+  if (me.myRole === ROLE.FACILITATOR) {
+    const saved = loadSession(me.sessionId);
+    if (!saved) return false;
+    state.session = saved;
+
+    try {
+      await createFacilitatorPeer(me.sessionId);
+    } catch (e) {
+      if (e.code === 'ID_TAKEN') {
+        // L'ancien Peer est encore vivant côté serveur de signalisation.
+        // Attendre 3s puis réessayer une fois.
+        await new Promise(r => setTimeout(r, 3000));
+        try { await createFacilitatorPeer(me.sessionId); }
+        catch (_) { return false; }
+      } else { return false; }
+    }
+
+    setUrlSessionId(me.sessionId);
+    onReady?.();
+    return true;
+
+  } else {
+    // Participant : reconnexion WebRTC
+    try {
+      await joinAsParticipant(me.sessionId);
+    } catch (_) { return false; }
+
+    setUrlSessionId(me.sessionId);
+    onReady?.();
+    return true;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   ACTIONS FACILITATEUR — synchrones (DataChannel immédiat)
+   ══════════════════════════════════════════════════ */
+
+/** Met à jour l'item sans relancer le vote. */
 export function updateItem(item) {
   if (!state.session) return;
   state.session.currentItem = item;
+  saveSession(state.session);
   broadcastState();
 }
 
-/**
- * Lance un nouveau vote : remet les votes à null, passe en statut 'voting'.
- * (CDC §4.3 — étape 1)
- * @param {string} [item] - Item mis à jour avant lancement
- */
+/** Lance un vote : reset des votes + statut → 'voting'. */
 export function launchVote(item) {
   if (!state.session) return;
   if (item !== undefined) state.session.currentItem = item;
   state.session.status = STATUS.VOTING;
   state.session.participants.forEach(p => { p.vote = null; });
+  saveSession(state.session);
   broadcastState();
 }
 
-/**
- * Révèle les votes de tous les participants.
- * (CDC §4.3 — étape 4)
- */
+/** Révèle les votes. */
 export function revealVotes() {
   if (!state.session) return;
   state.session.status = STATUS.REVEALED;
+  saveSession(state.session);
   broadcastState();
 }
 
-/**
- * Relance un nouveau tour : réinitialise les votes, repasse en 'waiting'.
- * (CDC §4.3 — relancer un vote)
- */
+/** Réinitialise pour un nouveau tour. */
 export function newRound() {
   if (!state.session) return;
   state.session.status = STATUS.WAITING;
   state.session.participants.forEach(p => { p.vote = null; });
+  saveSession(state.session);
   broadcastState();
 }
 
-/**
- * Clôture la session : diffuse l'événement, supprime les données.
- * (CDC §5.3)
- */
+/** Clôture la session : notifie tous et nettoie. */
 export function closeSession() {
   if (!state.session) return;
-  broadcast(MSG.SESSION_CLOSED);
-  deleteSession(state.sessionId);
+  const id = state.sessionId;
+  broadcastClose();
+  disconnectWebRTC();
+  deleteSession(id);
   clearMe();
   clearUrlSessionId();
-  closeChannel();
   state.session   = null;
   state.sessionId = null;
 }
 
 /* ══════════════════════════════════════════════════
-   ACTIONS PARTICIPANT (CDC §3.2)
+   ACTIONS PARTICIPANT — synchrones
    ══════════════════════════════════════════════════ */
 
 /**
- * Enregistre le vote du participant courant.
- * Ne peut être appelé que pendant la phase 'voting'.
- * (CDC §4.2 — une seule carte sélectionnable)
- *
- * @param {number} value - Valeur Fibonacci sélectionnée
- * @returns {boolean} false si le vote n'est pas autorisé
+ * Vote pour une valeur Fibonacci.
+ * Mise à jour locale immédiate + envoi au facilitateur.
+ * @param {number} value
+ * @returns {boolean}
  */
 export function castVote(value) {
-  if (!state.session) return false;
-  if (state.myRole === ROLE.FACILITATOR) return false;
+  if (!state.session)                         return false;
+  if (state.myRole === ROLE.FACILITATOR)      return false;
   if (state.session.status !== STATUS.VOTING) return false;
 
   const me = state.session.participants.find(p => p.id === state.myId);
   if (!me) return false;
 
   me.vote = value;
-  saveSession(state.session); // Persistance locale
-  broadcast(MSG.VOTE_CAST, { vote: value });
+  sendToFacilitator({ type: 'vote_cast', pid: state.myId, vote: value });
   return true;
 }
 
-/**
- * Le participant quitte la session.
- * Notifie le facilitateur et nettoie l'état local.
- */
+/** Quitte la session proprement. */
 export function leaveSession() {
   if (!state.session) return;
-  broadcast(MSG.PARTICIPANT_LEAVE);
+  sendToFacilitator({ type: 'participant_leave', pid: state.myId });
+  disconnectWebRTC();
   clearMe();
   clearUrlSessionId();
-  closeChannel();
   state.session   = null;
   state.sessionId = null;
 }
