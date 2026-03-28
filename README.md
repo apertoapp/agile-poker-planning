@@ -1,4 +1,4 @@
-# 🎯 Agile Poker Planning
+# 🎯 Agile Poker Planning --
 
 [![Planning Poker](https://img.shields.io/badge/Planning_Poker-8%20joueurs-blue?style=for-the-badge&logo=github)](https://apertoapp.github.io/agile-poker-planning/)
 [![100% Statique](https://img.shields.io/badge/100%25_Statique-NoServer-green?style=for-the-badge&logo=github)](https://apertoapp.github.io/agile-poker-planning/)
