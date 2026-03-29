@@ -9,24 +9,32 @@
 
 > **Application Planning Poker autonome en temps réel pour 8 participants maximum et 1 facilitateur.**
 
-## 📋 Description
+## 📋 À quoi ça sert ?
 
-Cette application permet aux équipes agiles de réaliser des estimations de tâches en utilisant la technique du Planning Poker. Elle fonctionne entièrement côté client, sans nécessiter de serveur backend.
+Le Planning Poker est la technique d'estimation la plus utilisée dans les équipes Agile et Scrum. Mais organiser une session en remote avec des outils dispersés (post-its, tableurs, votes à la main en visio) fait perdre du temps et génère des biais.
 
-## ✨ Fonctionnalités
+**Agile Poker Planning centralise tout** : chaque participant vote sur son appareil, les résultats s'affichent au même moment pour tout le monde, depuis n'importe quel navigateur et n'importe quel endroit dans le monde.
 
-### Pour les Participants
-- 🎴 Sélection d'une carte parmi 7 valeurs (0, 1, 2, 3, 5, 8, 13)
-- ⏱️ Visualisation du timer en temps réel
-- ✅ Validation du vote avec confirmation
-- 🔒 Verrouillage automatique après le vote
+---
 
-### Pour le Facilitateur
-- ⚙️ Configuration du timer (10-600 secondes)
-- ▶️ Démarrage de session de vote
-- 📊 Suivi en temps réel du nombre de participants ayant voté
-- 🎯 Affichage des résultats à la fin du timer
-- 🔄 Réinitialisation pour une nouvelle session
+## ✨ Ce que vous pouvez faire
+
+### En tant que facilitateur
+- ⚙️ Créer une session en 5 secondes, sans compte
+- ⚙️ Définir l'item à estimer (User Story, tâche, bug…)
+- ✅ Partager un lien d'invitation en un clic
+- ▶️ Lancer le vote quand tout le monde est prêt
+- 📊 Révéler toutes les cartes simultanément
+- 🔄 Relancer un tour si les écarts sont trop importants
+- 🎯 Clôturer la session en fin de réunion
+
+### En tant que participant
+- ⚙️ Rejoindre via un lien ou un code à 4 caractères
+- 🎴 Voter avec la suite Fibonacci : **0 — 1 — 2 — 3 — 5 — 8 — 13**
+- 🔄 Modifier son vote tant que les cartes ne sont pas révélées
+- 📊 Voir les résultats en temps réel dès la révélation
+
+---
 
 ## 🚀 Accédez à l'appliction 
 - **L'application est hébergée sur GitHub Page**
@@ -63,7 +71,6 @@ L'application utilise `localStorage` pour synchroniser les votes entre différen
 - **HTML5** : Structure des pages
 - **CSS3** : Design responsive et animations
 - **JavaScript Vanilla** : Logique métier (aucune dépendance)
-- **localStorage** : Stockage temporaire des votes
 
 ## ⚙️ Configuration
 
