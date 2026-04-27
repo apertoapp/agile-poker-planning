@@ -4,11 +4,6 @@
  * Câble les événements DOM aux fonctions de session.js.
  * Aucune logique métier ici — uniquement du câblage.
  *
- * Changements vs. version BroadcastChannel :
- *   - Plus d'imports channel.js / MSG
- *   - createSession et joinSession sont async → handlers async
- *   - Actions en salle (launchVote, castVote…) restent synchrones
- *   - Restauration via restoreSession() async
  */
 
 'use strict';
