@@ -10,7 +10,7 @@
 
 'use strict';
 
-import { LS_SESSION_PREFIX, SS_ME_KEY } from './config.js';
+import {LS_SESSION_PREFIX, SS_ME_KEY} from './config.js';
 
 /* ══════════════════════════════════════════════════
    SESSION — localStorage
@@ -21,11 +21,11 @@ import { LS_SESSION_PREFIX, SS_ME_KEY } from './config.js';
  * @param {import('./config.js').Session} session
  */
 export function saveSession(session) {
-  try {
-    localStorage.setItem(LS_SESSION_PREFIX + session.id, JSON.stringify(session));
-  } catch (e) {
-    console.error('[storage] saveSession:', e);
-  }
+    try {
+        localStorage.setItem(LS_SESSION_PREFIX + session.id, JSON.stringify(session));
+    } catch (e) {
+        console.error('[storage] saveSession:', e);
+    }
 }
 
 /**
@@ -34,13 +34,13 @@ export function saveSession(session) {
  * @returns {import('./config.js').Session|null}
  */
 export function loadSession(sessionId) {
-  try {
-    const raw = localStorage.getItem(LS_SESSION_PREFIX + sessionId);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.error('[storage] loadSession:', e);
-    return null;
-  }
+    try {
+        const raw = localStorage.getItem(LS_SESSION_PREFIX + sessionId);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        console.error('[storage] loadSession:', e);
+        return null;
+    }
 }
 
 /**
@@ -48,7 +48,7 @@ export function loadSession(sessionId) {
  * @param {string} sessionId
  */
 export function deleteSession(sessionId) {
-  localStorage.removeItem(LS_SESSION_PREFIX + sessionId);
+    localStorage.removeItem(LS_SESSION_PREFIX + sessionId);
 }
 
 /* ══════════════════════════════════════════════════
@@ -69,11 +69,11 @@ export function deleteSession(sessionId) {
  * @param {MeData} data
  */
 export function saveMe(data) {
-  try {
-    sessionStorage.setItem(SS_ME_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.error('[storage] saveMe:', e);
-  }
+    try {
+        sessionStorage.setItem(SS_ME_KEY, JSON.stringify(data));
+    } catch (e) {
+        console.error('[storage] saveMe:', e);
+    }
 }
 
 /**
@@ -81,18 +81,18 @@ export function saveMe(data) {
  * @returns {MeData|null}
  */
 export function loadMe() {
-  try {
-    const raw = sessionStorage.getItem(SS_ME_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.error('[storage] loadMe:', e);
-    return null;
-  }
+    try {
+        const raw = sessionStorage.getItem(SS_ME_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        console.error('[storage] loadMe:', e);
+        return null;
+    }
 }
 
 /**
  * Supprime l'identité de l'utilisateur (déconnexion / clôture).
  */
 export function clearMe() {
-  sessionStorage.removeItem(SS_ME_KEY);
+    sessionStorage.removeItem(SS_ME_KEY);
 }

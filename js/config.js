@@ -18,16 +18,16 @@ export const MAX_PARTICIPANTS = 8;
 /* ── Statuts de session (CDC §4.3) ──────────────────────────────────── */
 
 export const STATUS = {
-  WAITING:  'waiting',
-  VOTING:   'voting',
-  REVEALED: 'revealed',
+    WAITING: 'waiting',
+    VOTING: 'voting',
+    REVEALED: 'revealed',
 };
 
 /* ── Rôles utilisateur (CDC §3) ─────────────────────────────────────── */
 
 export const ROLE = {
-  FACILITATOR: 'facilitator',
-  PARTICIPANT:  'participant',
+    FACILITATOR: 'facilitator',
+    PARTICIPANT: 'participant',
 };
 
 /* ── Clés de persistance (CDC §7) ───────────────────────────────────── */
@@ -41,8 +41,8 @@ export const SS_ME_KEY = 'pps_me';
 /* ── Codes d'erreur métier ───────────────────────────────────────────── */
 
 export const ERR = {
-  SESSION_FULL:      'SESSION_FULL',
-  SESSION_NOT_FOUND: 'SESSION_NOT_FOUND',
+    SESSION_FULL: 'SESSION_FULL',
+    SESSION_NOT_FOUND: 'SESSION_NOT_FOUND',
 };
 
 /* ── Typedefs JSDoc ──────────────────────────────────────────────────── */

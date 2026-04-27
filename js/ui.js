@@ -21,9 +21,9 @@
  * @param {'home'|'room'} screenName
  */
 export function showScreen(screenName) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('screen-' + screenName);
-  if (el) el.classList.add('active');
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('screen-' + screenName);
+    if (el) el.classList.add('active');
 }
 
 /* ══════════════════════════════════════════════════
@@ -38,12 +38,12 @@ let _notifTimer = null;
  * @param {number} [duration=3000] - Durée en ms
  */
 export function showNotif(message, duration = 3000) {
-  const el = document.getElementById('notification');
-  if (!el) return;
-  el.textContent = message;
-  el.classList.add('show');
-  clearTimeout(_notifTimer);
-  _notifTimer = setTimeout(() => el.classList.remove('show'), duration);
+    const el = document.getElementById('notification');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(_notifTimer);
+    _notifTimer = setTimeout(() => el.classList.remove('show'), duration);
 }
 
 /* ══════════════════════════════════════════════════
@@ -55,8 +55,8 @@ export function showNotif(message, duration = 3000) {
  * @param {string} modalId - ID du div.overlay
  */
 export function showModal(modalId) {
-  const el = document.getElementById(modalId);
-  if (el) el.classList.add('show');
+    const el = document.getElementById(modalId);
+    if (el) el.classList.add('show');
 }
 
 /**
@@ -64,8 +64,8 @@ export function showModal(modalId) {
  * @param {string} modalId
  */
 export function hideModal(modalId) {
-  const el = document.getElementById(modalId);
-  if (el) el.classList.remove('show');
+    const el = document.getElementById(modalId);
+    if (el) el.classList.remove('show');
 }
 
 /* ══════════════════════════════════════════════════
@@ -78,14 +78,14 @@ export function hideModal(modalId) {
  * @param {string|null} message   - Texte d'erreur, ou null pour masquer
  */
 export function showError(elementId, message) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-  if (message) {
-    el.textContent = message;
-    el.classList.add('show');
-  } else {
-    el.classList.remove('show');
-  }
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    if (message) {
+        el.textContent = message;
+        el.classList.add('show');
+    } else {
+        el.classList.remove('show');
+    }
 }
 
 /**
@@ -93,7 +93,7 @@ export function showError(elementId, message) {
  * @param {string[]} ids
  */
 export function clearErrors(...ids) {
-  ids.forEach(id => showError(id, null));
+    ids.forEach(id => showError(id, null));
 }
 
 /* ══════════════════════════════════════════════════
@@ -107,27 +107,27 @@ export function clearErrors(...ids) {
  * @param {string} sessionId
  */
 export function renderHeader(name, role, sessionId) {
-  const header = document.getElementById('app-header');
-  const meta   = document.getElementById('header-meta');
-  if (!header || !meta) return;
+    const header = document.getElementById('app-header');
+    const meta = document.getElementById('header-meta');
+    if (!header || !meta) return;
 
-  header.style.display = 'flex';
+    header.style.display = 'flex';
 
-  const badgeClass = role === 'facilitator' ? 'badge-facilitator' : 'badge-participant';
-  const badgeLabel = role === 'facilitator' ? 'Facilitateur' : 'Participant';
+    const badgeClass = role === 'facilitator' ? 'badge-facilitator' : 'badge-participant';
+    const badgeLabel = role === 'facilitator' ? 'Facilitateur' : 'Participant';
 
-  meta.innerHTML =
-    `<strong>${esc(name)}</strong> &nbsp;` +
-    `<span class="badge ${badgeClass}">${badgeLabel}</span><br>` +
-    `<span style="font-size:.65rem">Session : <strong>${esc(sessionId)}</strong></span>`;
+    meta.innerHTML =
+        `<strong>${esc(name)}</strong> &nbsp;` +
+        `<span class="badge ${badgeClass}">${badgeLabel}</span><br>` +
+        `<span style="font-size:.65rem">Session : <strong>${esc(sessionId)}</strong></span>`;
 }
 
 /**
  * Masque l'en-tête (écran d'accueil).
  */
 export function hideHeader() {
-  const header = document.getElementById('app-header');
-  if (header) header.style.display = 'none';
+    const header = document.getElementById('app-header');
+    if (header) header.style.display = 'none';
 }
 
 /* ══════════════════════════════════════════════════
@@ -139,14 +139,14 @@ export function hideHeader() {
  * @param {string} text
  */
 export function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    const toast = document.getElementById('copy-toast');
-    if (!toast) return;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
-  }).catch(err => {
-    console.error('[ui] copyToClipboard:', err);
-  });
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('copy-toast');
+        if (!toast) return;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }).catch(err => {
+        console.error('[ui] copyToClipboard:', err);
+    });
 }
 
 /* ══════════════════════════════════════════════════
@@ -161,10 +161,10 @@ export function copyToClipboard(text) {
  * @returns {string}
  */
 export function esc(value) {
-  return String(value)
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/"/g,  '&quot;')
-    .replace(/'/g,  '&#39;');
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }

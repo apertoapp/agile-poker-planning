@@ -15,13 +15,16 @@
 
 'use strict';
 
-import { STATUS, ROLE, MAX_PARTICIPANTS } from './config.js';
-import { saveSession, loadSession, deleteSession, saveMe, clearMe } from './storage.js';
+import {ROLE, STATUS} from './config.js';
+import {clearMe, deleteSession, loadSession, saveMe, saveSession} from './storage.js';
 import {
-  initWebRTC,
-  createFacilitatorPeer, joinAsParticipant,
-  broadcastState, sendToFacilitator,
-  broadcastClose, disconnectWebRTC,
+    broadcastClose,
+    broadcastState,
+    createFacilitatorPeer,
+    disconnectWebRTC,
+    initWebRTC,
+    joinAsParticipant,
+    sendToFacilitator,
 } from './webrtc.js';
 
 /* ══════════════════════════════════════════════════
@@ -29,17 +32,17 @@ import {
    ══════════════════════════════════════════════════ */
 
 export const state = {
-  myId:      null,
-  myName:    '',
-  myRole:    '',
-  sessionId: null,
-  session:   null,
+    myId: null,
+    myName: '',
+    myRole: '',
+    sessionId: null,
+    session: null,
 
-  // Callbacks UI — injectés par app.js, utilisés par webrtc.js
-  onParticipantJoin:  null,
-  onParticipantLeave: null,
-  onSessionClosed:    null,
-  onError:            null,
+    // Callbacks UI — injectés par app.js, utilisés par webrtc.js
+    onParticipantJoin: null,
+    onParticipantLeave: null,
+    onSessionClosed: null,
+    onError: null,
 };
 
 /* ══════════════════════════════════════════════════
@@ -47,15 +50,15 @@ export const state = {
    ══════════════════════════════════════════════════ */
 
 function _genSessionId(len = 4) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from(
-    { length: len },
-    () => chars[Math.floor(Math.random() * chars.length)]
-  ).join('');
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    return Array.from(
+        {length: len},
+        () => chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
 }
 
 function _genParticipantId() {
-  return Math.random().toString(36).slice(2, 10);
+    return Math.random().toString(36).slice(2, 10);
 }
 
 /* ══════════════════════════════════════════════════
@@ -63,25 +66,25 @@ function _genParticipantId() {
    ══════════════════════════════════════════════════ */
 
 export function getUrlSessionId() {
-  return new URLSearchParams(window.location.search).get('session');
+    return new URLSearchParams(window.location.search).get('session');
 }
 
 export function setUrlSessionId(id) {
-  const url = new URL(window.location.href);
-  url.searchParams.set('session', id);
-  history.replaceState({}, '', url.toString());
+    const url = new URL(window.location.href);
+    url.searchParams.set('session', id);
+    history.replaceState({}, '', url.toString());
 }
 
 export function clearUrlSessionId() {
-  const url = new URL(window.location.href);
-  url.searchParams.delete('session');
-  history.replaceState({}, '', url.toString());
+    const url = new URL(window.location.href);
+    url.searchParams.delete('session');
+    history.replaceState({}, '', url.toString());
 }
 
 export function buildInviteUrl() {
-  const url = new URL(window.location.href);
-  url.searchParams.set('session', state.sessionId);
-  return url.toString();
+    const url = new URL(window.location.href);
+    url.searchParams.set('session', state.sessionId);
+    return url.toString();
 }
 
 /* ══════════════════════════════════════════════════
@@ -99,44 +102,44 @@ export function buildInviteUrl() {
  * @returns {Promise<boolean>}
  */
 export async function createSession(name, item = '', onReady, onRender) {
-  if (!name) return false;
+    if (!name) return false;
 
-  initWebRTC(state, onRender);
+    initWebRTC(state, onRender);
 
-  // Tenter jusqu'à 5 codes différents en cas de collision
-  let sessionId;
-  for (let i = 0; i < 5; i++) {
-    sessionId = _genSessionId(4);
-    try {
-      await createFacilitatorPeer(sessionId);
-      break; // succès
-    } catch (e) {
-      if (e.code === 'ID_TAKEN' && i < 4) continue;
-      console.error('[session] createFacilitatorPeer:', e);
-      return false;
+    // Tenter jusqu'à 5 codes différents en cas de collision
+    let sessionId;
+    for (let i = 0; i < 5; i++) {
+        sessionId = _genSessionId(4);
+        try {
+            await createFacilitatorPeer(sessionId);
+            break; // succès
+        } catch (e) {
+            if (e.code === 'ID_TAKEN' && i < 4) continue;
+            console.error('[session] createFacilitatorPeer:', e);
+            return false;
+        }
     }
-  }
 
-  state.myId      = _genParticipantId();
-  state.myName    = name;
-  state.myRole    = ROLE.FACILITATOR;
-  state.sessionId = sessionId;
+    state.myId = _genParticipantId();
+    state.myName = name;
+    state.myRole = ROLE.FACILITATOR;
+    state.sessionId = sessionId;
 
-  state.session = {
-    id:              sessionId,
-    facilitatorId:   state.myId,
-    facilitatorName: name,
-    status:          STATUS.WAITING,
-    currentItem:     item,
-    participants:    [{ id: state.myId, name, vote: null, isFacilitator: true }],
-    createdAt:       Date.now(),
-  };
+    state.session = {
+        id: sessionId,
+        facilitatorId: state.myId,
+        facilitatorName: name,
+        status: STATUS.WAITING,
+        currentItem: item,
+        participants: [{id: state.myId, name, vote: null, isFacilitator: true}],
+        createdAt: Date.now(),
+    };
 
-  saveSession(state.session);
-  saveMe({ myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId });
-  setUrlSessionId(sessionId);
-  onReady?.();
-  return true;
+    saveSession(state.session);
+    saveMe({myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId});
+    setUrlSessionId(sessionId);
+    onReady?.();
+    return true;
 }
 
 /* ══════════════════════════════════════════════════
@@ -160,31 +163,31 @@ export async function createSession(name, item = '', onReady, onRender) {
  * @returns {Promise<{success:boolean, error?:string}>}
  */
 export async function joinSession(code, name, onReady, onRender) {
-  if (!name) return { success: false, error: 'NAME_REQUIRED' };
-  if (!code) return { success: false, error: 'CODE_REQUIRED' };
+    if (!name) return {success: false, error: 'NAME_REQUIRED'};
+    if (!code) return {success: false, error: 'CODE_REQUIRED'};
 
-  state.myId   = _genParticipantId();
-  state.myName = name;
-  state.myRole = ROLE.PARTICIPANT;
+    state.myId = _genParticipantId();
+    state.myName = name;
+    state.myRole = ROLE.PARTICIPANT;
 
-  initWebRTC(state, onRender);
+    initWebRTC(state, onRender);
 
-  try {
-    await joinAsParticipant(code);
-    // state.session a été rempli par webrtc.js lors du premier state_sync
-  } catch (e) {
-    disconnectWebRTC();
-    const error = e.code === 'SESSION_NOT_FOUND' ? 'SESSION_NOT_FOUND'
-                : e.code === 'SESSION_FULL'      ? 'SESSION_FULL'
-                :                                  'PEER_ERROR';
-    return { success: false, error };
-  }
+    try {
+        await joinAsParticipant(code);
+        // state.session a été rempli par webrtc.js lors du premier state_sync
+    } catch (e) {
+        disconnectWebRTC();
+        const error = e.code === 'SESSION_NOT_FOUND' ? 'SESSION_NOT_FOUND'
+            : e.code === 'SESSION_FULL' ? 'SESSION_FULL'
+                : 'PEER_ERROR';
+        return {success: false, error};
+    }
 
-  state.sessionId = code;
-  saveMe({ myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId: code });
-  setUrlSessionId(code);
-  onReady?.();
-  return { success: true };
+    state.sessionId = code;
+    saveMe({myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId: code});
+    setUrlSessionId(code);
+    onReady?.();
+    return {success: true};
 }
 
 /* ══════════════════════════════════════════════════
@@ -203,44 +206,51 @@ export async function joinSession(code, name, onReady, onRender) {
  * @returns {Promise<boolean>}
  */
 export async function restoreSession(me, onReady, onRender) {
-  initWebRTC(state, onRender);
+    initWebRTC(state, onRender);
 
-  state.myId      = me.myId;
-  state.myName    = me.myName;
-  state.myRole    = me.myRole;
-  state.sessionId = me.sessionId;
+    state.myId = me.myId;
+    state.myName = me.myName;
+    state.myRole = me.myRole;
+    state.sessionId = me.sessionId;
 
-  if (me.myRole === ROLE.FACILITATOR) {
-    const saved = loadSession(me.sessionId);
-    if (!saved) return false;
-    state.session = saved;
+    if (me.myRole === ROLE.FACILITATOR) {
+        const saved = loadSession(me.sessionId);
+        if (!saved) return false;
+        state.session = saved;
 
-    try {
-      await createFacilitatorPeer(me.sessionId);
-    } catch (e) {
-      if (e.code === 'ID_TAKEN') {
-        // L'ancien Peer est encore vivant côté serveur de signalisation.
-        // Attendre 3s puis réessayer une fois.
-        await new Promise(r => setTimeout(r, 3000));
-        try { await createFacilitatorPeer(me.sessionId); }
-        catch (_) { return false; }
-      } else { return false; }
+        try {
+            await createFacilitatorPeer(me.sessionId);
+        } catch (e) {
+            if (e.code === 'ID_TAKEN') {
+                // L'ancien Peer est encore vivant côté serveur de signalisation.
+                // Attendre 3s puis réessayer une fois.
+                await new Promise(r => setTimeout(r, 3000));
+                try {
+                    await createFacilitatorPeer(me.sessionId);
+                } catch (_) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        setUrlSessionId(me.sessionId);
+        onReady?.();
+        return true;
+
+    } else {
+        // Participant : reconnexion WebRTC
+        try {
+            await joinAsParticipant(me.sessionId);
+        } catch (_) {
+            return false;
+        }
+
+        setUrlSessionId(me.sessionId);
+        onReady?.();
+        return true;
     }
-
-    setUrlSessionId(me.sessionId);
-    onReady?.();
-    return true;
-
-  } else {
-    // Participant : reconnexion WebRTC
-    try {
-      await joinAsParticipant(me.sessionId);
-    } catch (_) { return false; }
-
-    setUrlSessionId(me.sessionId);
-    onReady?.();
-    return true;
-  }
 }
 
 /* ══════════════════════════════════════════════════
@@ -249,50 +259,54 @@ export async function restoreSession(me, onReady, onRender) {
 
 /** Met à jour l'item sans relancer le vote. */
 export function updateItem(item) {
-  if (!state.session) return;
-  state.session.currentItem = item;
-  saveSession(state.session);
-  broadcastState();
+    if (!state.session) return;
+    state.session.currentItem = item;
+    saveSession(state.session);
+    broadcastState();
 }
 
 /** Lance un vote : reset des votes + statut → 'voting'. */
 export function launchVote(item) {
-  if (!state.session) return;
-  if (item !== undefined) state.session.currentItem = item;
-  state.session.status = STATUS.VOTING;
-  state.session.participants.forEach(p => { p.vote = null; });
-  saveSession(state.session);
-  broadcastState();
+    if (!state.session) return;
+    if (item !== undefined) state.session.currentItem = item;
+    state.session.status = STATUS.VOTING;
+    state.session.participants.forEach(p => {
+        p.vote = null;
+    });
+    saveSession(state.session);
+    broadcastState();
 }
 
 /** Révèle les votes. */
 export function revealVotes() {
-  if (!state.session) return;
-  state.session.status = STATUS.REVEALED;
-  saveSession(state.session);
-  broadcastState();
+    if (!state.session) return;
+    state.session.status = STATUS.REVEALED;
+    saveSession(state.session);
+    broadcastState();
 }
 
 /** Réinitialise pour un nouveau tour. */
 export function newRound() {
-  if (!state.session) return;
-  state.session.status = STATUS.WAITING;
-  state.session.participants.forEach(p => { p.vote = null; });
-  saveSession(state.session);
-  broadcastState();
+    if (!state.session) return;
+    state.session.status = STATUS.WAITING;
+    state.session.participants.forEach(p => {
+        p.vote = null;
+    });
+    saveSession(state.session);
+    broadcastState();
 }
 
 /** Clôture la session : notifie tous et nettoie. */
 export function closeSession() {
-  if (!state.session) return;
-  const id = state.sessionId;
-  broadcastClose();
-  disconnectWebRTC();
-  deleteSession(id);
-  clearMe();
-  clearUrlSessionId();
-  state.session   = null;
-  state.sessionId = null;
+    if (!state.session) return;
+    const id = state.sessionId;
+    broadcastClose();
+    disconnectWebRTC();
+    deleteSession(id);
+    clearMe();
+    clearUrlSessionId();
+    state.session = null;
+    state.sessionId = null;
 }
 
 /* ══════════════════════════════════════════════════
@@ -306,25 +320,25 @@ export function closeSession() {
  * @returns {boolean}
  */
 export function castVote(value) {
-  if (!state.session)                         return false;
-  if (state.myRole === ROLE.FACILITATOR)      return false;
-  if (state.session.status !== STATUS.VOTING) return false;
+    if (!state.session) return false;
+    if (state.myRole === ROLE.FACILITATOR) return false;
+    if (state.session.status !== STATUS.VOTING) return false;
 
-  const me = state.session.participants.find(p => p.id === state.myId);
-  if (!me) return false;
+    const me = state.session.participants.find(p => p.id === state.myId);
+    if (!me) return false;
 
-  me.vote = value;
-  sendToFacilitator({ type: 'vote_cast', pid: state.myId, vote: value });
-  return true;
+    me.vote = value;
+    sendToFacilitator({type: 'vote_cast', pid: state.myId, vote: value});
+    return true;
 }
 
 /** Quitte la session proprement. */
 export function leaveSession() {
-  if (!state.session) return;
-  sendToFacilitator({ type: 'participant_leave', pid: state.myId });
-  disconnectWebRTC();
-  clearMe();
-  clearUrlSessionId();
-  state.session   = null;
-  state.sessionId = null;
+    if (!state.session) return;
+    sendToFacilitator({type: 'participant_leave', pid: state.myId});
+    disconnectWebRTC();
+    clearMe();
+    clearUrlSessionId();
+    state.session = null;
+    state.sessionId = null;
 }
