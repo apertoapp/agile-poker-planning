@@ -112,8 +112,8 @@ Les couleurs principales sont définies dans `style.css` via des gradients :
 ```css
 /* Participant */
 background:
-
 linear-gradient
+
 (
 135
 deg, #667eea
@@ -130,8 +130,8 @@ deg, #667eea
 
 /* Facilitateur */
 background:
-
 linear-gradient
+
 (
 135
 deg, #f093fb
