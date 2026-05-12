@@ -1,6 +1,6 @@
 # 🎯 Agile Poker Planning
 
-**Estimez mieux. Décidez plus vite. Ensemble.**
+**Estimez mieux. Décidez plus vite. Ensemble**
 
 [![Planning Poker](https://img.shields.io/badge/Planning_Poker-8%20joueurs-blue?style=for-the-badge&logo=github)](https://apertoapp.github.io/agile-poker-planning/)
 [![Gratuit](https://img.shields.io/badge/100%25_Gratuit-green?style=for-the-badge)]()
@@ -11,15 +11,19 @@
 
 ## 📋 À quoi ça sert ?
 
-Le Planning Poker est la technique d'estimation la plus utilisée dans les équipes Agile et Scrum. Mais organiser une session en remote avec des outils dispersés (post-its, tableurs, votes à la main en visio) fait perdre du temps et génère des biais.
+Le Planning Poker est la technique d'estimation la plus utilisée dans les équipes Agile et Scrum. Mais organiser une
+session en remote avec des outils dispersés (post-its, tableurs, votes à la main en visio) fait perdre du temps et
+génère des biais.
 
-**Agile Poker Planning centralise tout** : chaque participant vote sur son appareil, les résultats s'affichent au même moment pour tout le monde, depuis n'importe quel navigateur et n'importe quel endroit dans le monde.
+**Agile Poker Planning centralise tout** : chaque participant vote sur son appareil, les résultats s'affichent au même
+moment pour tout le monde, depuis n'importe quel navigateur et n'importe quel endroit dans le monde.
 
 ---
 
 ## ✨ Ce que vous pouvez faire
 
 ### En tant que facilitateur
+
 - ⚙️ Créer une session en 5 secondes, sans compte
 - ⚙️ Définir l'item à estimer (User Story, tâche, bug…)
 - ✅ Partager un lien d'invitation en un clic
@@ -29,6 +33,7 @@ Le Planning Poker est la technique d'estimation la plus utilisée dans les équi
 - 🎯 Clôturer la session en fin de réunion
 
 ### En tant que participant
+
 - ⚙️ Rejoindre via un lien ou un code à 4 caractères
 - 🎴 Voter avec la suite Fibonacci : **0 — 1 — 2 — 3 — 5 — 8 — 13**
 - 🔄 Modifier son vote tant que les cartes ne sont pas révélées
@@ -36,7 +41,8 @@ Le Planning Poker est la technique d'estimation la plus utilisée dans les équi
 
 ---
 
-## 🚀 Accédez à l'appliction 
+## 🚀 Accédez à l'appliction
+
 - **L'application est hébergée sur GitHub Page**
 - **URL** : [https://apertoapp.github.io/agile-poker-planning](https://apertoapp.github.io/agile-poker-planning)
 
@@ -61,7 +67,8 @@ Le Planning Poker est la technique d'estimation la plus utilisée dans les équi
 
 ### Synchronisation multi-utilisateurs
 
-L'application utilise `localStorage` pour synchroniser les votes entre différents onglets/fenêtres du même navigateur. Pour une vraie session multi-utilisateurs sur différents appareils, vous devriez :
+L'application utilise `localStorage` pour synchroniser les votes entre différents onglets/fenêtres du même navigateur.
+Pour une vraie session multi-utilisateurs sur différents appareils, vous devriez :
 
 - Soit ouvrir tous les participants sur le même appareil (différents onglets)
 - Soit implémenter une solution backend avec WebSockets ou Firebase
@@ -83,6 +90,7 @@ const CARD_VALUES = ['0', '1', '2', '3', '5', '8', '13'];
 ```
 
 Exemples :
+
 - **Fibonacci complet** : `['0', '½', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?']`
 - **T-Shirt Sizing** : `['XS', 'S', 'M', 'L', 'XL', 'XXL']`
 - **Heures** : `['1h', '2h', '4h', '8h', '16h', '24h']`
@@ -103,10 +111,40 @@ Les couleurs principales sont définies dans `style.css` via des gradients :
 
 ```css
 /* Participant */
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+background:
+
+linear-gradient
+(
+135
+deg, #667eea
+
+0
+%
+,
+#764ba2
+
+100
+%
+)
+;
 
 /* Facilitateur */
-background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+background:
+
+linear-gradient
+(
+135
+deg, #f093fb
+
+0
+%
+,
+#f5576c
+
+100
+%
+)
+;
 ```
 
 ### Son de fin
@@ -152,6 +190,7 @@ Ce projet est sous licence MIT. Vous êtes libre de l'utiliser, le modifier et l
 ## 👥 Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à :
+
 - Signaler des bugs
 - Proposer des nouvelles fonctionnalités
 - Soumettre des pull requests
