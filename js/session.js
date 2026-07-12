@@ -17,6 +17,7 @@
 
 import {ROLE, STATUS} from './config.js';
 import {clearMe, deleteSession, loadSession, saveMe, saveSession} from './storage.js';
+import * as fb from './firebase.js';
 import {
     broadcastClose,
     broadcastState,
@@ -104,6 +105,62 @@ export function buildInviteUrl() {
 export async function createSession(name, item = '', onReady, onRender) {
     if (!name) return false;
 
+    // If Firebase is configured, use Firestore as the source of truth
+    if (fb.isEnabled()) {
+        await fb.ensureInit();
+        // Use auth UID if present, otherwise generate a stable id for this tab
+        const uid = fb.getAuthUid() || _genParticipantId();
+
+        state.myId = uid;
+        state.myName = name;
+        state.myRole = ROLE.FACILITATOR;
+
+        // Generate a sessionId and create Firestore document (retry on collision)
+        let sessionId;
+        for (let i = 0; i < 5; i++) {
+            sessionId = _genSessionId(4);
+            try {
+                await fb.createSessionFirestore(sessionId, uid, name, item);
+                break;
+            } catch (e) {
+                // If the session doc already exists, retry a few times
+                if (e && e.code === 'ALREADY_EXISTS' && i < 4) continue;
+                console.error('[session][firebase] createSessionFirestore:', e);
+                return false;
+            }
+        }
+
+        state.sessionId = sessionId;
+        state.session = {
+            id: sessionId,
+            facilitatorId: state.myId,
+            facilitatorName: name,
+            status: STATUS.WAITING,
+            currentItem: item,
+            participants: [{id: state.myId, name, vote: null, isFacilitator: true}],
+            createdAt: Date.now(),
+        };
+
+        saveMe({myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId});
+        setUrlSessionId(sessionId);
+
+        // Start real-time listener
+        try {
+            await fb.listenSession(sessionId, (sess) => {
+                state.session = sess;
+                onRender?.();
+            }, (err) => {
+                console.warn('[session][firebase] listenSession error', err);
+            });
+        } catch (e) {
+            console.warn('[session][firebase] listenSession setup failed', e);
+        }
+
+        onReady?.();
+        return true;
+    }
+
+    // Fallback: existing WebRTC PeerJS facilitator flow
     initWebRTC(state, onRender);
 
     // Tenter jusqu'à 5 codes différents en cas de collision
@@ -170,6 +227,35 @@ export async function joinSession(code, name, onReady, onRender) {
     state.myName = name;
     state.myRole = ROLE.PARTICIPANT;
 
+    // If Firebase is enabled, use Firestore join flow
+    if (fb.isEnabled()) {
+        try {
+            await fb.ensureInit();
+            const uid = fb.getAuthUid() || state.myId;
+            state.myId = uid;
+            await fb.addParticipant(code, uid, name);
+
+            // Start listening to session updates
+            await fb.listenSession(code, (sess) => {
+                state.session = sess;
+                onRender?.();
+            }, (err) => {
+                console.warn('[session][firebase] listenSession error', err);
+            });
+
+        } catch (e) {
+            const errCode = e && e.code ? e.code : 'PEER_ERROR';
+            return {success: false, error: errCode};
+        }
+
+        state.sessionId = code;
+        saveMe({myId: state.myId, myName: state.myName, myRole: state.myRole, sessionId: code});
+        setUrlSessionId(code);
+        onReady?.();
+        return {success: true};
+    }
+
+    // Fallback: original WebRTC join flow
     initWebRTC(state, onRender);
 
     try {
@@ -206,6 +292,33 @@ export async function joinSession(code, name, onReady, onRender) {
  * @returns {Promise<boolean>}
  */
 export async function restoreSession(me, onReady, onRender) {
+    // If Firebase is enabled, re-subscribe to the Firestore session
+    if (fb.isEnabled()) {
+        await fb.ensureInit();
+
+        state.myId = me.myId;
+        state.myName = me.myName;
+        state.myRole = me.myRole;
+        state.sessionId = me.sessionId;
+
+        try {
+            await fb.listenSession(me.sessionId, (sess) => {
+                state.session = sess;
+                onRender?.();
+            }, (err) => {
+                console.warn('[session][firebase] restore listen error', err);
+            });
+        } catch (e) {
+            console.warn('[session][firebase] restore failed', e);
+            return false;
+        }
+
+        setUrlSessionId(me.sessionId);
+        onReady?.();
+        return true;
+    }
+
+    // Default WebRTC restore logic
     initWebRTC(state, onRender);
 
     state.myId = me.myId;
@@ -328,13 +441,31 @@ export function castVote(value) {
     if (!me) return false;
 
     me.vote = value;
-    sendToFacilitator({type: 'vote_cast', pid: state.myId, vote: value});
+
+    if (fb.isEnabled()) {
+        // Persist vote in Firestore
+        fb.castVoteFirestore(state.sessionId, state.myId, value).catch(e => console.warn('[session][firebase] castVote', e));
+    } else {
+        // Default P2P transport
+        sendToFacilitator({type: 'vote_cast', pid: state.myId, vote: value});
+    }
     return true;
 }
 
 /** Quitte la session proprement. */
 export function leaveSession() {
     if (!state.session) return;
+
+    if (fb.isEnabled()) {
+        // Remove participant from Firestore and clear local state
+        fb.removeParticipant(state.sessionId, state.myId).catch(e => console.warn('[session][firebase] removeParticipant', e));
+        clearMe();
+        clearUrlSessionId();
+        state.session = null;
+        state.sessionId = null;
+        return;
+    }
+
     sendToFacilitator({type: 'participant_leave', pid: state.myId});
     disconnectWebRTC();
     clearMe();

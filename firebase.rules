@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /sessions/{sessionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.keys().hasAll(["id","facilitatorUid","facilitatorName","status"]);
+      allow update: if request.auth != null && (
+        // facilitator can update any field
+        request.auth.uid == resource.data.facilitatorUid ||
+        // participants may only update safe fields on their participant doc
+        false
+      );
+      allow delete: if request.auth != null && request.auth.uid == resource.data.facilitatorUid;
+
+      match /participants/{participantId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == participantId;
+        allow update: if request.auth != null && request.auth.uid == participantId;
+        allow delete: if request.auth != null && (request.auth.uid == resource.data.id || request.auth.uid == get(/databases/$(database)/documents/sessions/$(sessionId)).data.facilitatorUid);
+      }
+    }
+  }
+}
